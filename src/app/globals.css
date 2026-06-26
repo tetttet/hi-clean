@@ -1,26 +1,90 @@
 @import "tailwindcss";
+@layer theme, base, components, utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f8f4;
+  --foreground: #151a17;
+  --background-inverse-1: #eef2ea;
+  --background-inverse-2: #ffffff;
+  --muted: rgba(21, 26, 23, 0.62);
+  --line: rgba(21, 26, 23, 0.12);
+  --accent: #e95f35;
+  --accent-soft: #f2d7cc;
+  --footer-links: rgba(21, 26, 23, 0.58);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-inverse-1: var(--background-inverse-1);
+  --color-inverse-2: var(--background-inverse-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-footer-links: var(--footer-links);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  background: var(--background);
+}
+
+.font-anton-sc {
+  font-family: var(--font-anton-sc);
+}
+
+.font-gambetta {
+  font-family: var(--font-gambetta);
+}
+
+.font-sans {
+  font-family: var(--font-montserrat);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.perspective-container,
+.perspective-section {
+  perspective: 1000px;
+  perspective-origin: center;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+.transform-container {
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+::view-transition-group(root) {
+  z-index: auto !important;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+  will-change: transform, opacity, scale;
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  animation: none !important;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  animation: none !important;
 }
