@@ -6,8 +6,8 @@ export const SOCIAL_LINKS = {
   },
   telegram: {
     name: "Telegram",
-    displayName: "Telegram @Bren228",
-    href: "https://t.me/Bren228",
+    displayName: "Telegram @HI_CLEAN1",
+    href: "https://t.me/HI_CLEAN1",
   },
   instagram: {
     name: "Instagram",

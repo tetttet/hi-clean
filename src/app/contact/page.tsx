@@ -2,9 +2,36 @@ import type { Metadata } from "next";
 import Navigation from "@/components/common/navigation";
 import { SOCIAL_LINKS } from "@/constants/social-links";
 
+const title = "Contact | HI-Clean";
+const description =
+  "Message HI-Clean on WhatsApp, Instagram, or Telegram for cleaning in Istanbul.";
+const previewImage = {
+  url: "/images/logo.jpeg",
+  width: 1254,
+  height: 536,
+  alt: "HI-Clean cleaning service logo",
+};
+
 export const metadata: Metadata = {
-  title: "Contact | HI-Clean",
-  description: "Contact HI-Clean on WhatsApp, Instagram, or Telegram.",
+  title: {
+    absolute: title,
+  },
+  description,
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title,
+    description,
+    url: "/contact",
+    images: [previewImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [previewImage.url],
+  },
 };
 
 const contactLinks = [

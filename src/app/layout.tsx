@@ -27,11 +27,84 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "HI-Clean | Apartment and House Cleaning",
-  description:
-    "Premium apartment and house cleaning with a careful, reliable team.",
+const siteName = "HI-Clean";
+const siteUrl = getSiteUrl();
+const defaultTitle = "HI-Clean | Apartment and House Cleaning in Istanbul";
+const defaultDescription =
+  "Premium apartment, house, deep, move-in, sofa, mattress, chair, pouf, and carpet cleaning in Istanbul.";
+const previewImage = {
+  url: "/images/logo.jpeg",
+  width: 1254,
+  height: 536,
+  alt: "HI-Clean cleaning service logo",
 };
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: siteName,
+  title: {
+    default: defaultTitle,
+    template: `%s | ${siteName}`,
+  },
+  description: defaultDescription,
+  keywords: [
+    "HI-Clean",
+    "Istanbul cleaning",
+    "apartment cleaning",
+    "house cleaning",
+    "deep cleaning",
+    "sofa cleaning",
+    "carpet cleaning",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [
+      {
+        url: "/images/icon.png",
+        sizes: "3200x3200",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/images/icon.png",
+        sizes: "3200x3200",
+        type: "image/png",
+      },
+    ],
+  },
+  openGraph: {
+    title: defaultTitle,
+    description: defaultDescription,
+    url: "/",
+    siteName,
+    images: [previewImage],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [previewImage.url],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+function getSiteUrl() {
+  const url =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.VERCEL_URL ??
+    "http://localhost:3000";
+
+  return url.startsWith("http") ? url : `https://${url}`;
+}
 
 export default function RootLayout({
   children,
