@@ -44,13 +44,42 @@ export const services: Service[] = [
     duration: "3-5 saat",
     basePrice: "2.700 TL",
     options: [
-      { id: "1-1", label: "1+1", price: "2.700 TL", detail: "Kompakt evler icin" },
-      { id: "2-1", label: "2+1", price: "3.700 TL", detail: "Orta olcekli evler icin" },
-      { id: "3-1", label: "3+1", price: "4.700 TL", detail: "Genis aile evleri icin" },
-      { id: "4-1", label: "4+1", price: "5.700 TL", detail: "Buyuk evler icin" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Ozel metrekare ve planlar" },
+      {
+        id: "1-1",
+        label: "1+1",
+        price: "2.700 TL",
+        detail: "Kompakt evler icin",
+      },
+      {
+        id: "2-1",
+        label: "2+1",
+        price: "3.700 TL",
+        detail: "Orta olcekli evler icin",
+      },
+      {
+        id: "3-1",
+        label: "3+1",
+        price: "4.700 TL",
+        detail: "Genis aile evleri icin",
+      },
+      {
+        id: "4-1",
+        label: "4+1",
+        price: "5.700 TL",
+        detail: "Buyuk evler icin",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Ozel metrekare ve planlar",
+      },
     ],
-    includes: ["Ulasilabilir yuzeylerde toz alma", "Zemin supurme ve silme", "Mutfak ve banyo yuzeyleri"],
+    includes: [
+      "Ulasilabilir yuzeylerde toz alma",
+      "Zemin supurme ve silme",
+      "Mutfak ve banyo yuzeyleri",
+    ],
     detailSections: [
       {
         title: "Tum odalar",
@@ -100,13 +129,37 @@ export const services: Service[] = [
     duration: "5-8 saat",
     basePrice: "4.000 TL",
     options: [
-      { id: "1-1", label: "1+1", price: "4.000 TL", detail: "Detayli baslangic paketi" },
+      {
+        id: "1-1",
+        label: "1+1",
+        price: "4.000 TL",
+        detail: "Detayli baslangic paketi",
+      },
       { id: "2-1", label: "2+1", price: "5.500 TL", detail: "Dengeli kapsam" },
-      { id: "3-1", label: "3+1", price: "7.000 TL", detail: "Genis kapsamli temizlik" },
-      { id: "4-1", label: "4+1", price: "8.500 TL", detail: "Buyuk alan plani" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Ozel planlama" },
+      {
+        id: "3-1",
+        label: "3+1",
+        price: "7.000 TL",
+        detail: "Genis kapsamli temizlik",
+      },
+      {
+        id: "4-1",
+        label: "4+1",
+        price: "8.500 TL",
+        detail: "Buyuk alan plani",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Ozel planlama",
+      },
     ],
-    includes: ["Hafif temizlige ek kapsam", "Zor alan ve kose temizligi", "Yag ve kirec giderme"],
+    includes: [
+      "Hafif temizlige ek kapsam",
+      "Zor alan ve kose temizligi",
+      "Yag ve kirec giderme",
+    ],
     detailSections: [
       {
         title: "Tum odalar",
@@ -163,13 +216,42 @@ export const services: Service[] = [
     duration: "6-10 saat",
     basePrice: "6.000 TL",
     options: [
-      { id: "1-1", label: "1+1", price: "6.000 TL", detail: "Baslangic fiyati" },
-      { id: "2-1", label: "2+1", price: "7.000 TL", detail: "Baslangic fiyati" },
-      { id: "3-1", label: "3+1", price: "8.000 TL", detail: "Baslangic fiyati" },
-      { id: "4-1", label: "4+1", price: "9.000 TL", detail: "Baslangic fiyati" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Kesif sonrasi fiyat" },
+      {
+        id: "1-1",
+        label: "1+1",
+        price: "6.000 TL",
+        detail: "Baslangic fiyati",
+      },
+      {
+        id: "2-1",
+        label: "2+1",
+        price: "7.000 TL",
+        detail: "Baslangic fiyati",
+      },
+      {
+        id: "3-1",
+        label: "3+1",
+        price: "8.000 TL",
+        detail: "Baslangic fiyati",
+      },
+      {
+        id: "4-1",
+        label: "4+1",
+        price: "9.000 TL",
+        detail: "Baslangic fiyati",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Kesif sonrasi fiyat",
+      },
     ],
-    includes: ["Ince insaat tozu temizligi", "Boya ve yapistirici izi giderme", "Profesyonel zemin temizligi"],
+    includes: [
+      "Ince insaat tozu temizligi",
+      "Boya ve yapistirici izi giderme",
+      "Profesyonel zemin temizligi",
+    ],
     detailSections: [
       {
         title: "Tum alanlar",
@@ -217,11 +299,30 @@ export const services: Service[] = [
     duration: "5-9 saat",
     basePrice: "Teklif aliniz",
     options: [
-      { id: "bos-daire", label: "Bos daire", price: "Teklif aliniz", detail: "Tasinma oncesi hazirlik" },
-      { id: "teslim", label: "Ev teslimi", price: "Teklif aliniz", detail: "Kiraci degisimi veya satis oncesi" },
-      { id: "ozel", label: "Ozel plan", price: "Teklif aliniz", detail: "Alan durumuna gore" },
+      {
+        id: "bos-daire",
+        label: "Bos daire",
+        price: "Teklif aliniz",
+        detail: "Tasinma oncesi hazirlik",
+      },
+      {
+        id: "teslim",
+        label: "Ev teslimi",
+        price: "Teklif aliniz",
+        detail: "Kiraci degisimi veya satis oncesi",
+      },
+      {
+        id: "ozel",
+        label: "Ozel plan",
+        price: "Teklif aliniz",
+        detail: "Alan durumuna gore",
+      },
     ],
-    includes: ["Bos alan temizligi", "Dolap icleri", "Kapi, duvar ve zemin detaylari"],
+    includes: [
+      "Bos alan temizligi",
+      "Dolap icleri",
+      "Kapi, duvar ve zemin detaylari",
+    ],
     detailSections: [
       {
         title: "Tum odalar",
@@ -266,21 +367,53 @@ export const services: Service[] = [
     title: "Koltuk Yikama",
     category: "Kumas Bakimi",
     multiplier: "Parca bazli",
-    description: "Koltuk ve oturma gruplarinda leke on islemi, yikama ve vakumlu kurutma.",
+    description:
+      "Koltuk ve oturma gruplarinda leke on islemi, yikama ve vakumlu kurutma.",
     duration: "1-3 saat",
     basePrice: "600 TL",
     options: [
-      { id: "tekli", label: "1 kisilik", price: "600 TL", detail: "Tekli koltuk" },
-      { id: "ikili", label: "2 kisilik", price: "900 TL", detail: "Ikili koltuk" },
-      { id: "uclu", label: "3 kisilik", price: "1.200 TL", detail: "Uclu koltuk" },
-      { id: "dortlu", label: "4 kisilik", price: "1.500 TL", detail: "Genis oturma alani" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Ozel olculer" },
+      {
+        id: "tekli",
+        label: "1 kisilik",
+        price: "600 TL",
+        detail: "Tekli koltuk",
+      },
+      {
+        id: "ikili",
+        label: "2 kisilik",
+        price: "900 TL",
+        detail: "Ikili koltuk",
+      },
+      {
+        id: "uclu",
+        label: "3 kisilik",
+        price: "1.200 TL",
+        detail: "Uclu koltuk",
+      },
+      {
+        id: "dortlu",
+        label: "4 kisilik",
+        price: "1.500 TL",
+        detail: "Genis oturma alani",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Ozel olculer",
+      },
     ],
     includes: ["Leke on islemi", "Kumas yikama", "Vakumlu kurutma"],
     detailSections: [
       {
         title: "Kapsam",
-        items: ["Kumas kontrolu", "Leke on islemi", "Profesyonel yikama", "Vakumlu kurutma", "Koku giderme"],
+        items: [
+          "Kumas kontrolu",
+          "Leke on islemi",
+          "Profesyonel yikama",
+          "Vakumlu kurutma",
+          "Koku giderme",
+        ],
       },
     ],
   },
@@ -289,19 +422,41 @@ export const services: Service[] = [
     title: "Yatak Yikama",
     category: "Hijyen Bakimi",
     multiplier: "Olcu bazli",
-    description: "Yatak yuzeylerinde hijyen, ferahlik ve derin temizlik saglayan bakim.",
+    description:
+      "Yatak yuzeylerinde hijyen, ferahlik ve derin temizlik saglayan bakim.",
     duration: "1-2 saat",
     basePrice: "1.000 TL",
     options: [
-      { id: "tek", label: "Tek kisilik", price: "1.000 TL", detail: "Standart yatak" },
-      { id: "cift", label: "Cift kisilik", price: "1.500 TL", detail: "Genis yatak" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Ozel olculer" },
+      {
+        id: "tek",
+        label: "Tek kisilik",
+        price: "1.000 TL",
+        detail: "Standart yatak",
+      },
+      {
+        id: "cift",
+        label: "Cift kisilik",
+        price: "1.500 TL",
+        detail: "Genis yatak",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Ozel olculer",
+      },
     ],
     includes: ["Yuzey hijyeni", "Koku giderme", "Vakumlu temizlik"],
     detailSections: [
       {
         title: "Kapsam",
-        items: ["Yatak yuzey kontrolu", "Derin vakumlama", "Kumas yuzey temizligi", "Koku giderme", "Hijyen bakimi"],
+        items: [
+          "Yatak yuzey kontrolu",
+          "Derin vakumlama",
+          "Kumas yuzey temizligi",
+          "Koku giderme",
+          "Hijyen bakimi",
+        ],
       },
     ],
   },
@@ -310,19 +465,41 @@ export const services: Service[] = [
     title: "Sandalye Yikama",
     category: "Kumas Bakimi",
     multiplier: "Adet bazli",
-    description: "Ev, ofis ve isletme sandalyeleri icin hizli ve duzenli kumas temizligi.",
+    description:
+      "Ev, ofis ve isletme sandalyeleri icin hizli ve duzenli kumas temizligi.",
     duration: "1-2 saat",
     basePrice: "300 TL",
     options: [
-      { id: "standart", label: "Standart boy", price: "300 TL", detail: "Tek sandalye" },
-      { id: "buyuk", label: "Buyuk boy", price: "450 TL", detail: "Genis oturum" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Toplu adetler" },
+      {
+        id: "standart",
+        label: "Standart boy",
+        price: "300 TL",
+        detail: "Tek sandalye",
+      },
+      {
+        id: "buyuk",
+        label: "Buyuk boy",
+        price: "450 TL",
+        detail: "Genis oturum",
+      },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Toplu adetler",
+      },
     ],
     includes: ["Kumas temizligi", "Leke on islemi", "Hizli kuruma"],
     detailSections: [
       {
         title: "Kapsam",
-        items: ["Kumas kontrolu", "Leke on islemi", "Yikama", "Vakumlu kurutma", "Toplu adet planlama"],
+        items: [
+          "Kumas kontrolu",
+          "Leke on islemi",
+          "Yikama",
+          "Vakumlu kurutma",
+          "Toplu adet planlama",
+        ],
       },
     ],
   },
@@ -335,15 +512,31 @@ export const services: Service[] = [
     duration: "1 saat",
     basePrice: "400 TL",
     options: [
-      { id: "standart", label: "Standart boy", price: "400 TL", detail: "Tek puf" },
+      {
+        id: "standart",
+        label: "Standart boy",
+        price: "400 TL",
+        detail: "Tek puf",
+      },
       { id: "buyuk", label: "Buyuk boy", price: "500 TL", detail: "Genis puf" },
-      { id: "ozel", label: "Diger", price: "Teklif aliniz", detail: "Ozel olculer" },
+      {
+        id: "ozel",
+        label: "Diger",
+        price: "Teklif aliniz",
+        detail: "Ozel olculer",
+      },
     ],
     includes: ["Kumas bakimi", "Leke on islemi", "Koku giderme"],
     detailSections: [
       {
         title: "Kapsam",
-        items: ["Kumas kontrolu", "Leke on islemi", "Profesyonel yikama", "Vakumlu kurutma", "Koku giderme"],
+        items: [
+          "Kumas kontrolu",
+          "Leke on islemi",
+          "Profesyonel yikama",
+          "Vakumlu kurutma",
+          "Koku giderme",
+        ],
       },
     ],
   },
@@ -352,18 +545,35 @@ export const services: Service[] = [
     title: "Hali Yikama",
     category: "Metrekare Hizmeti",
     multiplier: "m2 bazli",
-    description: "Hali yapisi ve kirlilik durumuna gore profesyonel temizlik ve teslim plani.",
+    description:
+      "Hali yapisi ve kirlilik durumuna gore profesyonel temizlik ve teslim plani.",
     duration: "Planli teslim",
     basePrice: "450-550 TL / m2",
     options: [
-      { id: "metrekare", label: "Metrekare", price: "450-550 TL / m2", detail: "Malzeme ve kirlilige gore" },
-      { id: "toplu", label: "Toplu hali", price: "Teklif aliniz", detail: "Birden fazla hali icin" },
+      {
+        id: "metrekare",
+        label: "Metrekare",
+        price: "450-550 TL / m2",
+        detail: "Malzeme ve kirlilige gore",
+      },
+      {
+        id: "toplu",
+        label: "Toplu hali",
+        price: "Teklif aliniz",
+        detail: "Birden fazla hali icin",
+      },
     ],
     includes: ["Malzeme kontrolu", "Derin yikama", "Teslim plani"],
     detailSections: [
       {
         title: "Kapsam",
-        items: ["Hali malzeme kontrolu", "Kirlilik seviyesi degerlendirmesi", "Derin yikama", "Koku giderme", "Teslim planlama"],
+        items: [
+          "Hali malzeme kontrolu",
+          "Kirlilik seviyesi degerlendirmesi",
+          "Derin yikama",
+          "Koku giderme",
+          "Teslim planlama",
+        ],
       },
     ],
   },
@@ -385,11 +595,13 @@ export const additionalServices: AdditionalService[] = [
 export const campaignItems: CampaignItem[] = [
   {
     title: "Ilk hizmet hediyesi",
-    description: "Ilk kez rezervasyon olusturan musterilerimize kucuk bir hos geldiniz hediyesi sunulur.",
+    description:
+      "Ilk kez rezervasyon olusturan musterilerimize kucuk bir hos geldiniz hediyesi sunulur.",
   },
   {
     title: "Toplu talep avantaji",
-    description: "Buyuk veya grup siparislerinde indirim, ek hizmet ya da urun hediyesi planlanabilir.",
+    description:
+      "Buyuk veya grup siparislerinde indirim, ek hizmet ya da urun hediyesi planlanabilir.",
   },
 ];
 
@@ -478,9 +690,4 @@ export const frequencyOptions = [
   { id: "monthly", label: "Monthly", discount: 0.05 },
 ] as const;
 
-export const timeRangeOptions = [
-  "09:00 - 12:00",
-  "12:00 - 15:00",
-  "15:00 - 18:00",
-  "18:00 - 20:00",
-];
+export const timeRangeOptions = ["09:00", "12:00", "15:00", "18:00", "21:00"];

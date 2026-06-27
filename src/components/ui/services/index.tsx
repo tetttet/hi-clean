@@ -454,10 +454,12 @@ export default function ServicesPageInject() {
           />
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[290px_minmax(0,1fr)_300px] xl:grid-cols-[310px_minmax(0,1fr)_320px]">
-            <ServiceMenu
-              selectedService={selectedService}
-              onSelectService={selectService}
-            />
+            <div className={activeStep === 0 ? "" : "hidden lg:block"}>
+              <ServiceMenu
+                selectedService={selectedService}
+                onSelectService={selectService}
+              />
+            </div>
 
             <form className={panelClass} onSubmit={handleSubmit} noValidate>
               <div className="border-b border-[#151a17]/10 p-4 sm:p-5">
@@ -524,12 +526,12 @@ export default function ServicesPageInject() {
                   </div>
                 ) : null}
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-5 grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={goBack}
                     disabled={activeStep === 0}
-                    className="h-11 rounded-md border border-[#151a17]/14 bg-white/70 text-sm font-black text-[#151a17] transition hover:border-[#151a17] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="h-11 min-w-0 rounded-md border border-[#151a17]/14 bg-white/70 px-2 text-sm font-black text-[#151a17] transition hover:border-[#151a17] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Back
                   </button>
@@ -538,7 +540,7 @@ export default function ServicesPageInject() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="h-11 rounded-md bg-accent text-sm font-black text-white transition hover:bg-[#d94d26] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 min-w-0 rounded-md bg-accent px-2 text-sm font-black text-white transition hover:bg-[#d94d26] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSubmitting ? "Sending..." : "Send request"}
                     </button>
@@ -546,7 +548,7 @@ export default function ServicesPageInject() {
                     <button
                       type="button"
                       onClick={goNext}
-                      className="h-11 rounded-md bg-accent text-sm font-black text-white transition hover:bg-[#d94d26]"
+                      className="h-11 min-w-0 rounded-md bg-accent px-2 text-sm font-black text-white transition hover:bg-[#d94d26]"
                     >
                       Continue
                     </button>
@@ -865,7 +867,7 @@ function ServiceStep({
           tabIndex={-1}
           aria-invalid={Boolean(packageError)}
           aria-describedby={getErrorId("package-options", packageError)}
-          className={`mt-2 grid gap-2 rounded-md outline-none sm:grid-cols-2 xl:grid-cols-3 ${
+          className={`mt-2 grid grid-cols-2 gap-2 rounded-md outline-none xl:grid-cols-3 ${
             packageError ? "border border-accent/30 bg-accent/5 p-2" : ""
           }`}
         >
@@ -913,6 +915,7 @@ function ServiceStep({
           title: duration.label,
           text: duration.hours,
         }))}
+        mobileColumns={3}
         selectedId={formData.cleaningDurationId}
         onSelect={(id) => updateField("cleaningDurationId", id)}
       />
@@ -922,6 +925,7 @@ function ServiceStep({
           id="frequency-options"
           title="Frequency"
           error={fieldErrors.frequencyId}
+          mobileColumns={3}
           items={frequencyOptions.map((frequency) => ({
             id: frequency.id,
             title: frequency.label,
@@ -938,6 +942,7 @@ function ServiceStep({
           id="payment-options"
           title="Payment"
           error={fieldErrors.paymentMethodId}
+          mobileColumns={2}
           items={paymentMethods.map((method) => ({
             id: method.id,
             title: method.label,
@@ -1039,7 +1044,7 @@ function HomeStep({
           />
         </Field>
 
-        <Field label="Time" htmlFor="time-range" error={timeRangeError}>
+        <Field label="Start Time" htmlFor="time-range" error={timeRangeError}>
           <select
             id="time-range"
             required
@@ -1444,6 +1449,7 @@ function SegmentGroup({
   items,
   selectedId,
   onSelect,
+  mobileColumns = 1,
 }: {
   id?: string;
   title: string;
@@ -1451,7 +1457,17 @@ function SegmentGroup({
   items: { id: string; title: string; text: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
+  mobileColumns?: 1 | 2 | 3;
 }) {
+  const optionGridClass =
+    mobileColumns === 3
+      ? "grid-cols-3"
+      : mobileColumns === 2
+        ? "grid-cols-2 sm:grid-cols-3"
+        : "sm:grid-cols-3";
+  const optionButtonClass =
+    mobileColumns > 1 ? "min-h-16 p-2 sm:min-h-20 sm:p-3" : "min-h-20 p-3";
+
   return (
     <div
       id={id}
@@ -1463,7 +1479,7 @@ function SegmentGroup({
       }`}
     >
       <p className="text-sm font-bold text-[#151a17]">{title}</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+      <div className={`mt-2 grid gap-2 ${optionGridClass}`}>
         {items.map((item) => {
           const isSelected = item.id === selectedId;
 
@@ -1473,7 +1489,7 @@ function SegmentGroup({
               type="button"
               aria-pressed={isSelected}
               onClick={() => onSelect(item.id)}
-              className={`grid min-h-20 grid-rows-[auto_1fr] gap-1 rounded-md border p-3 text-left transition ${
+              className={`grid grid-rows-[auto_1fr] gap-1 rounded-md border text-left transition ${optionButtonClass} ${
                 isSelected
                   ? "border-[#151a17] bg-[#151a17] text-[#f7f8f4]"
                   : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-[#151a17]"
