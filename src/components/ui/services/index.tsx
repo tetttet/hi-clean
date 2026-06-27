@@ -1,7 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { type FormEvent, type ReactNode, useMemo, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Navigation from "@/components/common/navigation";
 import { hero_banner } from "@/constants/images";
 import {
@@ -44,6 +51,8 @@ type UpdateField = <Key extends keyof WizardFormData>(
   value: WizardFormData[Key]
 ) => void;
 
+type FieldErrors = Partial<Record<keyof WizardFormData, string>>;
+
 type PriceSummary = {
   totalLabel: string;
   lines: { label: string; value: string }[];
@@ -83,10 +92,78 @@ const inputClass =
 const textareaClass =
   "mt-1.5 w-full rounded-md border border-[#151a17]/14 bg-white/80 px-3 py-3 text-sm font-semibold text-[#151a17] outline-none transition placeholder:text-[#151a17]/36 focus:border-accent focus:ring-4 focus:ring-accent/12";
 
+const controlErrorClass =
+  "border-accent bg-accent/5 focus:border-accent focus:ring-accent/24";
+
+const fieldLabels: Partial<Record<keyof WizardFormData, string>> = {
+  city: "City",
+  district: "District",
+  serviceId: "Service type",
+  optionId: "Package",
+  cleaningDurationId: "Duration",
+  paymentMethodId: "Payment",
+  frequencyId: "Frequency",
+  rooms: "Rooms",
+  bathrooms: "Bathrooms",
+  squareMeters: "Square meters",
+  date: "Date",
+  timeRange: "Time",
+  firstName: "First name",
+  lastName: "Last name",
+  phone: "Phone",
+  email: "Email",
+  address: "Address",
+  approval: "Approval",
+};
+
+const fieldIds: Partial<Record<keyof WizardFormData, string>> = {
+  city: "city",
+  district: "district",
+  serviceId: "service-type",
+  optionId: "package-options",
+  cleaningDurationId: "duration-options",
+  paymentMethodId: "payment-options",
+  frequencyId: "frequency-options",
+  rooms: "rooms",
+  bathrooms: "bathrooms",
+  squareMeters: "square-meters",
+  date: "service-date",
+  timeRange: "time-range",
+  firstName: "first-name",
+  lastName: "last-name",
+  phone: "phone",
+  email: "email",
+  address: "address",
+  approval: "approval",
+};
+
+const fieldFocusOrder: (keyof WizardFormData)[] = [
+  "city",
+  "district",
+  "serviceId",
+  "optionId",
+  "cleaningDurationId",
+  "frequencyId",
+  "paymentMethodId",
+  "rooms",
+  "bathrooms",
+  "squareMeters",
+  "date",
+  "timeRange",
+  "firstName",
+  "lastName",
+  "phone",
+  "email",
+  "address",
+  "approval",
+];
+
 export default function ServicesPageInject() {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<WizardFormData>(initialFormData);
-  const [showStepError, setShowStepError] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [focusRequestId, setFocusRequestId] = useState(0);
+  const lastFocusedRequestId = useRef(0);
   const [isSent, setIsSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -144,9 +221,53 @@ export default function ServicesPageInject() {
     ]
   );
 
+  const fieldErrorList = getFieldErrorList(fieldErrors);
+  const hasFieldErrors = fieldErrorList.length > 0;
+
+  useEffect(() => {
+    if (
+      focusRequestId === 0 ||
+      focusRequestId === lastFocusedRequestId.current
+    ) {
+      return;
+    }
+
+    const fieldKey = fieldFocusOrder.find((key) => fieldErrors[key]);
+    const fieldId = fieldKey ? fieldIds[fieldKey] : undefined;
+    const fieldElement = fieldId ? document.getElementById(fieldId) : null;
+
+    fieldElement?.focus({ preventScroll: false });
+    lastFocusedRequestId.current = focusRequestId;
+  }, [activeStep, fieldErrors, focusRequestId]);
+
+  const resetValidationFeedback = () => {
+    setFieldErrors({});
+  };
+
+  const requestErrorFocus = () => {
+    setFocusRequestId((current) => current + 1);
+  };
+
   const updateField: UpdateField = (key, value) => {
-    setFormData((current) => ({ ...current, [key]: value }));
-    setShowStepError(false);
+    const nextData: WizardFormData = { ...formData, [key]: value };
+
+    setFormData(nextData);
+    setFieldErrors((current) => {
+      if (!current[key]) return current;
+
+      const next = { ...current };
+      const nextMessage = getStepErrors(activeStep, nextData, selectedOption)[
+        key
+      ];
+
+      if (nextMessage) {
+        next[key] = nextMessage;
+      } else {
+        delete next[key];
+      }
+
+      return next;
+    });
     setIsSent(false);
     setSubmitError("");
   };
@@ -160,7 +281,7 @@ export default function ServicesPageInject() {
       serviceId: nextService.id,
       optionId: nextService.options[0].id,
     }));
-    setShowStepError(false);
+    resetValidationFeedback();
     setIsSent(false);
     setSubmitError("");
   };
@@ -172,19 +293,30 @@ export default function ServicesPageInject() {
         ? current.addOns.filter((item) => item !== addOnId)
         : [...current.addOns, addOnId],
     }));
-    setShowStepError(false);
     setIsSent(false);
     setSubmitError("");
   };
 
+  const goToStep = (step: number) => {
+    setActiveStep(step);
+    resetValidationFeedback();
+  };
+
+  const goBack = () => {
+    goToStep(Math.max(activeStep - 1, 0));
+  };
+
   const goNext = () => {
-    if (!isStepValid(activeStep, formData)) {
-      setShowStepError(true);
+    const errors = getStepErrors(activeStep, formData, selectedOption);
+
+    if (hasValidationErrors(errors)) {
+      setFieldErrors(errors);
+      requestErrorFocus();
       return;
     }
 
     setActiveStep((current) => Math.min(current + 1, wizardSteps.length - 1));
-    setShowStepError(false);
+    resetValidationFeedback();
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -192,13 +324,14 @@ export default function ServicesPageInject() {
 
     if (isSubmitting) return;
 
-    const invalidStep = wizardSteps.findIndex((_, index) => {
-      return !isStepValid(index, formData);
-    });
+    const invalidStep = wizardSteps.findIndex((_, index) =>
+      hasValidationErrors(getStepErrors(index, formData, selectedOption))
+    );
 
     if (invalidStep >= 0) {
+      setFieldErrors(getStepErrors(invalidStep, formData, selectedOption));
       setActiveStep(invalidStep);
-      setShowStepError(true);
+      requestErrorFocus();
       setSubmitError("");
       return;
     }
@@ -279,19 +412,24 @@ export default function ServicesPageInject() {
               onSelectService={selectService}
             />
 
-            <form className={panelClass} onSubmit={handleSubmit}>
+            <form className={panelClass} onSubmit={handleSubmit} noValidate>
               <div className="border-b border-[#151a17]/10 p-4 sm:p-5">
-                <StepTabs activeStep={activeStep} setActiveStep={setActiveStep} />
+                <StepTabs activeStep={activeStep} setActiveStep={goToStep} />
               </div>
 
               <div className="p-4 sm:p-5">
                 {activeStep === 0 ? (
-                  <LocationStep formData={formData} updateField={updateField} />
+                  <LocationStep
+                    formData={formData}
+                    fieldErrors={fieldErrors}
+                    updateField={updateField}
+                  />
                 ) : null}
 
                 {activeStep === 1 ? (
                   <ServiceStep
                     formData={formData}
+                    fieldErrors={fieldErrors}
                     selectedService={selectedService}
                     selectService={selectService}
                     updateField={updateField}
@@ -301,6 +439,8 @@ export default function ServicesPageInject() {
                 {activeStep === 2 ? (
                   <HomeStep
                     formData={formData}
+                    fieldErrors={fieldErrors}
+                    selectedOption={selectedOption}
                     updateField={updateField}
                     toggleAddOn={toggleAddOn}
                   />
@@ -309,6 +449,7 @@ export default function ServicesPageInject() {
                 {activeStep === 3 ? (
                   <ContactStep
                     formData={formData}
+                    fieldErrors={fieldErrors}
                     selectedService={selectedService}
                     selectedOption={selectedOption}
                     selectedDuration={selectedDuration}
@@ -320,18 +461,26 @@ export default function ServicesPageInject() {
                   />
                 ) : null}
 
-                {showStepError ? (
-                  <p className="mt-4 rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm font-bold text-accent">
-                    Fill the required fields to continue.
-                  </p>
+                {hasFieldErrors ? (
+                  <div
+                    role="alert"
+                    className="mt-4 rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-sm font-bold text-accent"
+                  >
+                    <p>Fix these fields to continue:</p>
+                    <ul className="mt-1 grid gap-1">
+                      {fieldErrorList.map(({ key, label, message }) => (
+                        <li key={key}>
+                          {label}: {message}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      setActiveStep((current) => Math.max(current - 1, 0))
-                    }
+                    onClick={goBack}
                     disabled={activeStep === 0}
                     className="h-11 rounded-md border border-[#151a17]/14 bg-white/70 text-sm font-black text-[#151a17] transition hover:border-[#151a17] disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -362,7 +511,7 @@ export default function ServicesPageInject() {
                     role="status"
                     className="mt-4 rounded-md border border-[#d0a850]/45 bg-[#d0a850]/18 px-3 py-2 text-sm font-bold text-[#70550f]"
                   >
-                    Request was sent to Telegram.
+                    Request was sent successfully! We will contact you soon.
                   </p>
                 ) : null}
 
@@ -540,34 +689,45 @@ function StepTabs({
 
 function LocationStep({
   formData,
+  fieldErrors,
   updateField,
 }: {
   formData: WizardFormData;
+  fieldErrors: FieldErrors;
   updateField: UpdateField;
 }) {
+  const cityError = fieldErrors.city;
+  const districtError = fieldErrors.district;
+
   return (
     <StepShell
       title="Location"
       text="Choose where the team should come in Istanbul."
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="City" htmlFor="city">
+        <Field label="City" htmlFor="city" error={cityError}>
           <select
             id="city"
+            required
             value={formData.city}
             onChange={(event) => updateField("city", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(cityError)}
+            aria-describedby={getErrorId("city", cityError)}
+            className={getControlClass(inputClass, cityError)}
           >
             <option value="Istanbul">Istanbul</option>
           </select>
         </Field>
 
-        <Field label="District" htmlFor="district">
+        <Field label="District" htmlFor="district" error={districtError}>
           <select
             id="district"
+            required
             value={formData.district}
             onChange={(event) => updateField("district", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(districtError)}
+            aria-describedby={getErrorId("district", districtError)}
+            className={getControlClass(inputClass, districtError)}
           >
             <option value="" disabled>
               Select district
@@ -586,26 +746,34 @@ function LocationStep({
 
 function ServiceStep({
   formData,
+  fieldErrors,
   selectedService,
   selectService,
   updateField,
 }: {
   formData: WizardFormData;
+  fieldErrors: FieldErrors;
   selectedService: Service;
   selectService: (serviceId: string) => void;
   updateField: UpdateField;
 }) {
+  const serviceError = fieldErrors.serviceId;
+  const packageError = fieldErrors.optionId;
+
   return (
     <StepShell
       title="Service"
       text="Pick a service and a compact price package."
     >
-      <Field label="Service type" htmlFor="service-type">
+      <Field label="Service type" htmlFor="service-type" error={serviceError}>
         <select
           id="service-type"
+          required
           value={formData.serviceId}
           onChange={(event) => selectService(event.target.value)}
-          className={inputClass}
+          aria-invalid={Boolean(serviceError)}
+          aria-describedby={getErrorId("service-type", serviceError)}
+          className={getControlClass(inputClass, serviceError)}
         >
           {services.map((service) => (
             <option key={service.id} value={service.id}>
@@ -617,7 +785,15 @@ function ServiceStep({
 
       <div>
         <p className="text-sm font-bold text-[#151a17]">Package</p>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          id="package-options"
+          tabIndex={-1}
+          aria-invalid={Boolean(packageError)}
+          aria-describedby={getErrorId("package-options", packageError)}
+          className={`mt-2 grid gap-2 rounded-md outline-none sm:grid-cols-2 xl:grid-cols-3 ${
+            packageError ? "border border-accent/30 bg-accent/5 p-2" : ""
+          }`}
+        >
           {selectedService.options.map((option) => {
             const isSelected = option.id === formData.optionId;
 
@@ -650,10 +826,13 @@ function ServiceStep({
             );
           })}
         </div>
+        <FieldError id="package-options-error" message={packageError} />
       </div>
 
       <SegmentGroup
+        id="duration-options"
         title="Duration"
+        error={fieldErrors.cleaningDurationId}
         items={cleaningDurations.map((duration) => ({
           id: duration.id,
           title: duration.label,
@@ -665,7 +844,9 @@ function ServiceStep({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <SegmentGroup
+          id="frequency-options"
           title="Frequency"
+          error={fieldErrors.frequencyId}
           items={frequencyOptions.map((frequency) => ({
             id: frequency.id,
             title: frequency.label,
@@ -679,7 +860,9 @@ function ServiceStep({
         />
 
         <SegmentGroup
+          id="payment-options"
           title="Payment"
+          error={fieldErrors.paymentMethodId}
           items={paymentMethods.map((method) => ({
             id: method.id,
             title: method.label,
@@ -695,71 +878,101 @@ function ServiceStep({
 
 function HomeStep({
   formData,
+  fieldErrors,
+  selectedOption,
   updateField,
   toggleAddOn,
 }: {
   formData: WizardFormData;
+  fieldErrors: FieldErrors;
+  selectedOption: PriceOption;
   updateField: UpdateField;
   toggleAddOn: (addOnId: string) => void;
 }) {
+  const needsSquareMeters = selectedOption.price.includes("/ m2");
+  const roomsError = fieldErrors.rooms;
+  const bathroomsError = fieldErrors.bathrooms;
+  const squareMetersError = fieldErrors.squareMeters;
+  const dateError = fieldErrors.date;
+  const timeRangeError = fieldErrors.timeRange;
+
   return (
     <StepShell title="Home" text="Add the size and preferred time.">
       <div className="grid gap-3 sm:grid-cols-3">
-        <Field label="Rooms" htmlFor="rooms">
+        <Field label="Rooms" htmlFor="rooms" error={roomsError}>
           <input
             id="rooms"
             type="number"
             min="1"
             max="12"
+            required
             value={formData.rooms}
             onChange={(event) => updateField("rooms", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(roomsError)}
+            aria-describedby={getErrorId("rooms", roomsError)}
+            className={getControlClass(inputClass, roomsError)}
           />
         </Field>
-        <Field label="Bathrooms" htmlFor="bathrooms">
+        <Field label="Bathrooms" htmlFor="bathrooms" error={bathroomsError}>
           <input
             id="bathrooms"
             type="number"
             min="1"
             max="8"
+            required
             value={formData.bathrooms}
             onChange={(event) => updateField("bathrooms", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(bathroomsError)}
+            aria-describedby={getErrorId("bathrooms", bathroomsError)}
+            className={getControlClass(inputClass, bathroomsError)}
           />
         </Field>
-        <Field label="Square meters" htmlFor="square-meters">
+        <Field
+          label="Square meters"
+          htmlFor="square-meters"
+          error={squareMetersError}
+        >
           <input
             id="square-meters"
             type="number"
             min="1"
             max="1000"
+            required={needsSquareMeters}
             value={formData.squareMeters}
             onChange={(event) =>
               updateField("squareMeters", event.target.value)
             }
-            placeholder="Optional"
-            className={inputClass}
+            placeholder={needsSquareMeters ? "Required" : "Optional"}
+            aria-invalid={Boolean(squareMetersError)}
+            aria-describedby={getErrorId("square-meters", squareMetersError)}
+            className={getControlClass(inputClass, squareMetersError)}
           />
         </Field>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Date" htmlFor="service-date">
+        <Field label="Date" htmlFor="service-date" error={dateError}>
           <input
             id="service-date"
             type="date"
+            required
             value={formData.date}
             onChange={(event) => updateField("date", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(dateError)}
+            aria-describedby={getErrorId("service-date", dateError)}
+            className={getControlClass(inputClass, dateError)}
           />
         </Field>
 
-        <Field label="Time" htmlFor="time-range">
+        <Field label="Time" htmlFor="time-range" error={timeRangeError}>
           <select
             id="time-range"
+            required
             value={formData.timeRange}
             onChange={(event) => updateField("timeRange", event.target.value)}
-            className={inputClass}
+            aria-invalid={Boolean(timeRangeError)}
+            aria-describedby={getErrorId("time-range", timeRangeError)}
+            className={getControlClass(inputClass, timeRangeError)}
           >
             <option value="" disabled>
               Select time
@@ -817,6 +1030,7 @@ function HomeStep({
 
 function ContactStep({
   formData,
+  fieldErrors,
   selectedService,
   selectedOption,
   selectedDuration,
@@ -827,6 +1041,7 @@ function ContactStep({
   updateField,
 }: {
   formData: WizardFormData;
+  fieldErrors: FieldErrors;
   selectedService: Service;
   selectedOption: PriceOption;
   selectedDuration: (typeof cleaningDurations)[number];
@@ -836,48 +1051,64 @@ function ContactStep({
   priceSummary: PriceSummary;
   updateField: UpdateField;
 }) {
+  const firstNameError = fieldErrors.firstName;
+  const lastNameError = fieldErrors.lastName;
+  const phoneError = fieldErrors.phone;
+  const emailError = fieldErrors.email;
+  const addressError = fieldErrors.address;
+  const approvalError = fieldErrors.approval;
+
   return (
     <StepShell title="Contact" text="Finish with your contact details.">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="First name" htmlFor="first-name">
+        <Field label="First name" htmlFor="first-name" error={firstNameError}>
           <input
             id="first-name"
             type="text"
             autoComplete="given-name"
+            required
             value={formData.firstName}
             onChange={(event) => updateField("firstName", event.target.value)}
             placeholder="Name"
-            className={inputClass}
+            aria-invalid={Boolean(firstNameError)}
+            aria-describedby={getErrorId("first-name", firstNameError)}
+            className={getControlClass(inputClass, firstNameError)}
           />
         </Field>
 
-        <Field label="Last name" htmlFor="last-name">
+        <Field label="Last name" htmlFor="last-name" error={lastNameError}>
           <input
             id="last-name"
             type="text"
             autoComplete="family-name"
+            required
             value={formData.lastName}
             onChange={(event) => updateField("lastName", event.target.value)}
             placeholder="Surname"
-            className={inputClass}
+            aria-invalid={Boolean(lastNameError)}
+            aria-describedby={getErrorId("last-name", lastNameError)}
+            className={getControlClass(inputClass, lastNameError)}
           />
         </Field>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Phone" htmlFor="phone">
+        <Field label="Phone" htmlFor="phone" error={phoneError}>
           <input
             id="phone"
             type="tel"
             autoComplete="tel"
+            required
             value={formData.phone}
             onChange={(event) => updateField("phone", event.target.value)}
             placeholder="+90 5xx xxx xx xx"
-            className={inputClass}
+            aria-invalid={Boolean(phoneError)}
+            aria-describedby={getErrorId("phone", phoneError)}
+            className={getControlClass(inputClass, phoneError)}
           />
         </Field>
 
-        <Field label="Email" htmlFor="email">
+        <Field label="Email" htmlFor="email" error={emailError}>
           <input
             id="email"
             type="email"
@@ -885,21 +1116,29 @@ function ContactStep({
             value={formData.email}
             onChange={(event) => updateField("email", event.target.value)}
             placeholder="name@mail.com"
-            className={inputClass}
+            aria-invalid={Boolean(emailError)}
+            aria-describedby={getErrorId("email", emailError)}
+            className={getControlClass(inputClass, emailError)}
           />
         </Field>
       </div>
 
-      <Field label="Address" htmlFor="address">
+      <Field label="Address" htmlFor="address" error={addressError}>
         <textarea
           id="address"
           rows={3}
           autoComplete="street-address"
+          required
           value={formData.address}
           onChange={(event) => updateField("address", event.target.value)}
-          placeholder="Neighborhood, street, building, apartment"
-          className={textareaClass}
+          placeholder="Example: Moda Mah Caferaga Sok No 12 Daire 4"
+          aria-invalid={Boolean(addressError)}
+          aria-describedby={getErrorId("address", addressError)}
+          className={getControlClass(textareaClass, addressError)}
         />
+        <span className="mt-1.5 block text-xs font-semibold leading-5 text-[#151a17]/48">
+          Example: Moda Mah Caferaga Sok No 12 Daire 4. Commas are optional.
+        </span>
       </Field>
 
       <div className="rounded-md border border-[#151a17]/10 bg-white/65 p-3">
@@ -921,15 +1160,24 @@ function ContactStep({
         </dl>
       </div>
 
-      <label className="flex gap-3 rounded-md border border-[#151a17]/10 bg-white/70 p-3 text-sm font-semibold leading-6 text-[#151a17]/64">
+      <label
+        className={`flex gap-3 rounded-md border bg-white/70 p-3 text-sm font-semibold leading-6 text-[#151a17]/64 ${
+          approvalError ? "border-accent bg-accent/5" : "border-[#151a17]/10"
+        }`}
+      >
         <input
+          id="approval"
           type="checkbox"
+          required
           checked={formData.approval}
           onChange={(event) => updateField("approval", event.target.checked)}
+          aria-invalid={Boolean(approvalError)}
+          aria-describedby={getErrorId("approval", approvalError)}
           className="mt-1 h-4 w-4 rounded border-[#151a17]/30 accent-accent"
         />
         <span>I approve being contacted about this cleaning request.</span>
       </label>
+      <FieldError id="approval-error" message={approvalError} />
     </StepShell>
   );
 }
@@ -1005,18 +1253,30 @@ function EstimatePanel({
 }
 
 function SegmentGroup({
+  id,
   title,
+  error,
   items,
   selectedId,
   onSelect,
 }: {
+  id?: string;
   title: string;
+  error?: string;
   items: { id: string; title: string; text: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
   return (
-    <div>
+    <div
+      id={id}
+      tabIndex={id ? -1 : undefined}
+      aria-invalid={Boolean(error)}
+      aria-describedby={id ? getErrorId(id, error) : undefined}
+      className={`rounded-md outline-none ${
+        error ? "border border-accent/30 bg-accent/5 p-2" : ""
+      }`}
+    >
       <p className="text-sm font-bold text-[#151a17]">{title}</p>
       <div className="mt-2 grid gap-2 sm:grid-cols-3">
         {items.map((item) => {
@@ -1048,6 +1308,7 @@ function SegmentGroup({
           );
         })}
       </div>
+      <FieldError id={id ? `${id}-error` : undefined} message={error} />
     </div>
   );
 }
@@ -1079,17 +1340,34 @@ function StepShell({
 function Field({
   label,
   htmlFor,
+  error,
   children,
 }: {
   label: string;
   htmlFor: string;
+  error?: string;
   children: ReactNode;
 }) {
   return (
     <label htmlFor={htmlFor} className="block text-sm font-bold text-[#151a17]">
       {label}
       {children}
+      <FieldError id={`${htmlFor}-error`} message={error} />
     </label>
+  );
+}
+
+function FieldError({ id, message }: { id?: string; message?: string }) {
+  if (!message) return null;
+
+  return (
+    <span
+      id={id}
+      role="alert"
+      className="mt-1.5 block text-xs font-black leading-5 text-accent"
+    >
+      {message}
+    </span>
   );
 }
 
@@ -1207,40 +1485,186 @@ function calculatePrice({
   };
 }
 
-function isStepValid(step: number, formData: WizardFormData) {
+function getStepErrors(
+  step: number,
+  formData: WizardFormData,
+  selectedOption: PriceOption
+) {
+  const errors: FieldErrors = {};
+
   if (step === 0) {
-    return formData.city.length > 0 && formData.district.length > 0;
+    if (!hasText(formData.city)) {
+      errors.city = "Select a city.";
+    }
+
+    if (!hasText(formData.district)) {
+      errors.district = "Select a district.";
+    }
+
+    return errors;
   }
 
   if (step === 1) {
-    return (
-      formData.serviceId.length > 0 &&
-      formData.optionId.length > 0 &&
-      formData.cleaningDurationId.length > 0 &&
-      formData.paymentMethodId.length > 0
-    );
+    if (!hasText(formData.serviceId)) {
+      errors.serviceId = "Select a service.";
+    }
+
+    if (!hasText(formData.optionId)) {
+      errors.optionId = "Choose a package.";
+    }
+
+    if (!hasText(formData.cleaningDurationId)) {
+      errors.cleaningDurationId = "Choose a duration.";
+    }
+
+    if (!hasText(formData.frequencyId)) {
+      errors.frequencyId = "Choose a frequency.";
+    }
+
+    if (!hasText(formData.paymentMethodId)) {
+      errors.paymentMethodId = "Choose a payment method.";
+    }
+
+    return errors;
   }
 
   if (step === 2) {
-    return (
-      toNumber(formData.rooms) > 0 &&
-      toNumber(formData.bathrooms) > 0 &&
-      formData.date.length > 0 &&
-      formData.timeRange.length > 0
-    );
+    const rooms = toNumber(formData.rooms);
+    const bathrooms = toNumber(formData.bathrooms);
+    const squareMeters = toNumber(formData.squareMeters);
+    const needsSquareMeters = selectedOption.price.includes("/ m2");
+
+    if (!isInRange(rooms, 1, 12)) {
+      errors.rooms = "Enter a number from 1 to 12.";
+    }
+
+    if (!isInRange(bathrooms, 1, 8)) {
+      errors.bathrooms = "Enter a number from 1 to 8.";
+    }
+
+    if (needsSquareMeters && !hasText(formData.squareMeters)) {
+      errors.squareMeters = "Enter square meters for this package.";
+    } else if (
+      hasText(formData.squareMeters) &&
+      !isInRange(squareMeters, 1, 1000)
+    ) {
+      errors.squareMeters = "Enter a number from 1 to 1000.";
+    }
+
+    if (!hasText(formData.date)) {
+      errors.date = "Choose a service date.";
+    } else if (!isDateInputValue(formData.date)) {
+      errors.date = "Choose a valid service date.";
+    } else if (isPastInputDate(formData.date)) {
+      errors.date = "Choose today or a future date.";
+    }
+
+    if (!hasText(formData.timeRange)) {
+      errors.timeRange = "Select a time range.";
+    }
+
+    return errors;
   }
 
   if (step === 3) {
-    return (
-      formData.firstName.trim().length > 1 &&
-      formData.lastName.trim().length > 1 &&
-      formData.phone.trim().length > 5 &&
-      formData.address.trim().length > 8 &&
-      formData.approval
-    );
+    if (formData.firstName.trim().length < 2) {
+      errors.firstName = "Enter at least 2 characters.";
+    }
+
+    if (formData.lastName.trim().length < 2) {
+      errors.lastName = "Enter at least 2 characters.";
+    }
+
+    if (!hasText(formData.phone)) {
+      errors.phone = "Enter a phone number.";
+    } else if (countDigits(formData.phone) < 7) {
+      errors.phone = "Enter a valid phone number.";
+    }
+
+    if (hasText(formData.email) && !isValidEmail(formData.email)) {
+      errors.email = "Enter a valid email address.";
+    }
+
+    if (!isAddressDetailedEnough(formData.address)) {
+      errors.address =
+        "Enter neighborhood, street and building details. Commas are optional.";
+    }
+
+    if (!formData.approval) {
+      errors.approval = "Approve contact permission.";
+    }
+
+    return errors;
   }
 
-  return true;
+  return errors;
+}
+
+function hasValidationErrors(errors: FieldErrors) {
+  return Object.values(errors).some(Boolean);
+}
+
+function getFieldErrorList(errors: FieldErrors) {
+  return fieldFocusOrder.flatMap((key) => {
+    const message = errors[key];
+
+    if (!message) return [];
+
+    return [
+      {
+        key,
+        label: fieldLabels[key] ?? String(key),
+        message,
+      },
+    ];
+  });
+}
+
+function getControlClass(baseClass: string, error?: string) {
+  return error ? `${baseClass} ${controlErrorClass}` : baseClass;
+}
+
+function getErrorId(id: string, error?: string) {
+  return error ? `${id}-error` : undefined;
+}
+
+function hasText(value: string) {
+  return value.trim().length > 0;
+}
+
+function isInRange(value: number, min: number, max: number) {
+  return value >= min && value <= max;
+}
+
+function isDateInputValue(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function isPastInputDate(value: string) {
+  return value < getTodayInputValue();
+}
+
+function getTodayInputValue() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function countDigits(value: string) {
+  return value.replace(/\D/g, "").length;
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function isAddressDetailedEnough(value: string) {
+  const normalized = value.replace(/[,.]/g, " ").replace(/\s+/g, " ").trim();
+
+  return normalized.length >= 9 && normalized.split(" ").length >= 2;
 }
 
 function parsePrice(price: string) {

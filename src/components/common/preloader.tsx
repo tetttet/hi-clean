@@ -54,7 +54,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       });
     };
 
-    const totalDuration = 3.8;
+    const totalDuration = 1.8;
 
     const animateImages = () => {
       imageRefs.forEach((image, index) => {
@@ -76,19 +76,19 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         );
       });
 
-      animateDigit(digit1, 1.2, 3.1);
+      animateDigit(digit1, 0.55, 1.35);
       animateDigit(digit2, totalDuration);
-      animateDigit(digit3, totalDuration - 0.3);
+      animateDigit(digit3, totalDuration - 0.15);
 
-      gsap.delayedCall(totalDuration + 0.35, () => {
+      gsap.delayedCall(totalDuration + 0.12, () => {
         const tl = gsap.timeline();
 
         tl.to(
           imageRefs.filter(Boolean),
           {
             clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
-            duration: 0.8,
-            stagger: 0.04,
+            duration: 0.38,
+            stagger: 0.02,
             ease: "power3.inOut",
           },
           0
@@ -98,10 +98,10 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           [digit1, digit2, digit3],
           {
             clipPath: "inset(100% 0% 0% 0%)",
-            duration: 0.8,
+            duration: 0.38,
             ease: "power2.inOut",
             onComplete: () => {
-              window.setTimeout(onComplete, 250);
+              window.setTimeout(onComplete, 80);
             },
           },
           0
@@ -110,7 +110,7 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         tl.to(".preloader-container", {
           opacity: 0,
           scale: 0.96,
-          duration: 0.6,
+          duration: 0.28,
           ease: "power3.inOut",
           onComplete: () => {
             document.querySelector(".preloader-container")?.remove();
