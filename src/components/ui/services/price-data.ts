@@ -466,9 +466,9 @@ export const paymentMethods = [
     description: "Pay in cash after service.",
   },
   {
-    id: "iban",
-    label: "IBAN",
-    description: "Bank transfer placeholder.",
+    id: "card",
+    label: "Credit Card",
+    description: "Pay with a credit card.",
   },
 ] as const;
 
