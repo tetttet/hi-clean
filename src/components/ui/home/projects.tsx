@@ -4,10 +4,10 @@ import { FC, useContext, useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Image from "next/image";
-import { PROJECTS } from "@/constants/projects";
 import { TextReveal } from "@/components/common/text-reveal";
 import { DiagonalReveal } from "@/components/common/image-reveal";
 import { LoadingContext } from "@/components/layout";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +15,7 @@ const Projects = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const { isLoading, animationComplete } = useContext(LoadingContext);
+  const content = useSiteContent().home.results;
 
   function initializeGSAP() {
     const ctx = gsap.context(() => {
@@ -80,7 +81,7 @@ const Projects = () => {
           <div className="flex items-center justify-between">
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
               <TextReveal splitType="lines" direction="up" duration={0.7}>
-                (Recent results)
+                {content.eyebrow}
               </TextReveal>
             </p>
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
@@ -98,15 +99,11 @@ const Projects = () => {
                 duration={0.7}
                 stagger={0.05}
               >
-                Results
+                {content.title}
               </TextReveal>
             </div>
             <p className="mt-6 max-w-5xl text-3xl font-semibold leading-[120%] sm:text-5xl lg:text-[3.75rem]">
-              {[
-                "From lived-in apartments to",
-                "guest-ready homes, every clean",
-                "is finished with visible care.",
-              ].map((line, i) => (
+              {content.lines.map((line, i) => (
                 <TextReveal
                   splitType="lines"
                   direction="up"
@@ -123,7 +120,7 @@ const Projects = () => {
         </header>
 
         <div className="mx-auto grid max-w-[1440px] grid-cols-1 md:grid-cols-2">
-          {PROJECTS.map((project, index) => (
+          {content.projects.map((project, index) => (
             <ProjectCard key={project.name} {...project} index={index} />
           ))}
         </div>

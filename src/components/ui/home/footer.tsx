@@ -4,9 +4,9 @@ import { useContext, useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
-import { FOOTER_LINKS } from "@/constants/footer";
 import { TextReveal } from "@/components/common/text-reveal";
 import { LoadingContext } from "@/components/layout";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +14,7 @@ const Footer = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const { isLoading, animationComplete } = useContext(LoadingContext);
+  const content = useSiteContent().home.footer;
 
   const getExternalLinkProps = (href: string) => {
     if (!href.startsWith("http")) return {};
@@ -76,7 +77,7 @@ const Footer = () => {
         <div>
           <p className="mb-8 max-w-3xl text-2xl font-semibold leading-[140%] text-muted sm:text-3xl">
             <TextReveal splitType="lines" direction="up" duration={0.7}>
-              Book a home cleaning that feels easy from the first message.
+              {content.intro}
             </TextReveal>
           </p>
           <h2 className="font-anton-sc text-6xl uppercase leading-none text-foreground sm:text-8xl lg:text-[11.37rem]">
@@ -102,7 +103,7 @@ const Footer = () => {
         </div>
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {FOOTER_LINKS.map((links, index) => (
+          {content.links.map((links, index) => (
             <div key={links.category} className="flex flex-col space-y-6">
               <h4 className="font-gambetta text-2xl text-footer-links">
                 <TextReveal

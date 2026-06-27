@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PRELOADER_IMAGES } from "@/constants/images";
 
 export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const digit1Ref = useRef<HTMLDivElement | null>(null);
   const digit2Ref = useRef<HTMLDivElement | null>(null);
   const digit3Ref = useRef<HTMLDivElement | null>(null);
@@ -13,7 +14,14 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     const digit1 = digit1Ref.current;
     const digit2 = digit2Ref.current;
     const digit3 = digit3Ref.current;
+    const container = containerRef.current;
     const imageRefs = [...imagesRef.current];
+    const digitRefs = [digit1, digit2, digit3].filter(
+      (element): element is HTMLDivElement => Boolean(element)
+    );
+    let isMounted = true;
+    let delayedExit: gsap.core.Tween | undefined;
+    let exitTimeline: gsap.core.Timeline | undefined;
 
     if (digit3) {
       digit3.innerHTML = "";
@@ -80,10 +88,10 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       animateDigit(digit2, totalDuration);
       animateDigit(digit3, totalDuration - 0.15);
 
-      gsap.delayedCall(totalDuration + 0.12, () => {
-        const tl = gsap.timeline();
+      delayedExit = gsap.delayedCall(totalDuration + 0.12, () => {
+        exitTimeline = gsap.timeline();
 
-        tl.to(
+        exitTimeline.to(
           imageRefs.filter(Boolean),
           {
             clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
@@ -94,28 +102,31 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           0
         );
 
-        tl.to(
-          [digit1, digit2, digit3],
+        exitTimeline.to(
+          digitRefs,
           {
             clipPath: "inset(100% 0% 0% 0%)",
             duration: 0.38,
             ease: "power2.inOut",
-            onComplete: () => {
-              window.setTimeout(onComplete, 80);
-            },
           },
           0
         );
 
-        tl.to(".preloader-container", {
-          opacity: 0,
-          scale: 0.96,
-          duration: 0.28,
-          ease: "power3.inOut",
-          onComplete: () => {
-            document.querySelector(".preloader-container")?.remove();
-          },
-        });
+        if (container) {
+          exitTimeline.to(container, {
+            opacity: 0,
+            scale: 0.96,
+            duration: 0.28,
+            ease: "power3.inOut",
+            onComplete: () => {
+              if (isMounted) {
+                window.setTimeout(onComplete, 80);
+              }
+            },
+          });
+        } else if (isMounted) {
+          window.setTimeout(onComplete, 80);
+        }
       });
     };
 
@@ -137,17 +148,22 @@ export const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     Promise.all(loadPromises).then(animateImages);
 
     return () => {
+      isMounted = false;
+      delayedExit?.kill();
+      exitTimeline?.kill();
       gsap.killTweensOf([
-        digit1,
-        digit2,
-        digit3,
+        container,
+        ...digitRefs,
         ...imageRefs,
       ]);
     };
   }, [onComplete]);
 
   return (
-    <div className="preloader-container fixed inset-0 z-[999999] flex h-screen w-full items-center justify-center overflow-hidden bg-background text-foreground">
+    <div
+      ref={containerRef}
+      className="preloader-container fixed inset-0 z-[999999] flex h-screen w-full items-center justify-center overflow-hidden bg-background text-foreground"
+    >
       <div className="relative flex h-full w-full items-center justify-center">
         <div className="relative h-[min(68vh,34rem)] w-[min(82vw,38rem)] overflow-hidden border border-line bg-inverse-2 shadow-[0_24px_80px_rgba(21,26,23,0.12)]">
           {PRELOADER_IMAGES.map((image, index) => (

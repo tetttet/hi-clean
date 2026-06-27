@@ -4,10 +4,10 @@ import { useContext, useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useScroll } from "framer-motion";
-import { TESTIMONIALS } from "@/constants/testimonials";
 import { TextReveal } from "@/components/common/text-reveal";
 import { FallingCard } from "./falling-card";
 import { LoadingContext } from "@/components/layout";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,6 +22,7 @@ const Testimonials = () => {
   });
 
   const { isLoading, animationComplete } = useContext(LoadingContext);
+  const content = useSiteContent().home.testimonials;
 
   function initializeGSAP() {
     const ctx = gsap.context(() => {
@@ -87,7 +88,7 @@ const Testimonials = () => {
           <div className="flex items-center justify-between">
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
               <TextReveal splitType="lines" direction="up" duration={0.7}>
-                (Testimonials)
+                {content.eyebrow}
               </TextReveal>
             </p>
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
@@ -99,7 +100,7 @@ const Testimonials = () => {
 
           <div>
             <h2 className="font-anton-sc text-6xl uppercase leading-none sm:text-8xl lg:text-[10rem] xl:text-[11.25rem]">
-              {["What our", "clients say"].map((line, i) => (
+              {content.title.map((line, i) => (
                 <TextReveal
                   splitType="chars"
                   direction="up"
@@ -113,11 +114,7 @@ const Testimonials = () => {
               ))}
             </h2>
             <p className="mt-6 max-w-5xl text-3xl font-semibold leading-[120%] sm:text-5xl lg:text-[3.75rem]">
-              {[
-                "Fresh rooms, simple booking,",
-                "and a cleaning team people",
-                "feel comfortable inviting in.",
-              ].map((line, i) => (
+              {content.lines.map((line, i) => (
                 <TextReveal
                   splitType="lines"
                   direction="up"
@@ -137,7 +134,7 @@ const Testimonials = () => {
           className="grid grid-cols-1 gap-4 px-4 pb-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-0 lg:px-0"
           ref={testimonialRef}
         >
-          {TESTIMONIALS.map((testimonial, i) => (
+          {content.items.map((testimonial, i) => (
             <FallingCard
               key={`${testimonial.name}-${i}`}
               index={i}

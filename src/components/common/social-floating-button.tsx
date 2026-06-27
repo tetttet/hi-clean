@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { SOCIAL_LINKS } from "@/constants/social-links";
+import { withoutLocale } from "@/i18n/paths";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 const ICON_CLASS = "h-6 w-6";
 
@@ -85,8 +87,13 @@ const SOCIAL_ACTIONS = [
 export const SocialFloatingButton = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const content = useSiteContent().socialFloating;
+  const pathnameWithoutLocale = withoutLocale(pathname);
 
-  if (pathname === "/services" || pathname.startsWith("/services/")) {
+  if (
+    pathnameWithoutLocale === "/services" ||
+    pathnameWithoutLocale.startsWith("/services/")
+  ) {
     return null;
   }
 
@@ -119,7 +126,7 @@ export const SocialFloatingButton = () => {
 
       <button
         type="button"
-        aria-label={isOpen ? "Close social links" : "Open social links"}
+        aria-label={isOpen ? content.closeLabel : content.openLabel}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-[0_18px_42px_rgba(21,26,23,0.28)] outline-none transition duration-300 hover:bg-accent focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-16 sm:w-16"

@@ -1,38 +1,23 @@
-import type { Metadata } from "next";
 import Navigation from "@/components/common/navigation";
 import { SOCIAL_LINKS } from "@/constants/social-links";
+import { getContent } from "@/i18n/content";
+import { createPageMetadata } from "@/i18n/metadata";
+import { isLocale } from "@/i18n/routing";
+import { notFound } from "next/navigation";
 
-const title = "Contact | HI-Clean";
-const description =
-  "Message HI-Clean on WhatsApp, Instagram, or Telegram for cleaning in Istanbul.";
-const previewImage = {
-  url: "/images/logo.jpeg",
-  width: 1254,
-  height: 536,
-  alt: "HI-Clean cleaning service logo",
+type ContactPageProps = {
+  params: Promise<{ locale: string }>;
 };
 
-export const metadata: Metadata = {
-  title: {
-    absolute: title,
-  },
-  description,
-  alternates: {
-    canonical: "/contact",
-  },
-  openGraph: {
-    title,
-    description,
-    url: "/contact",
-    images: [previewImage],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [previewImage.url],
-  },
-};
+export async function generateMetadata({ params }: ContactPageProps) {
+  const { locale } = await params;
+
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
+  return createPageMetadata(locale, "contact", "/contact");
+}
 
 const contactLinks = [
   {
@@ -50,7 +35,15 @@ const contactLinks = [
   },
 ] as const;
 
-export default function ContactPage() {
+export default async function ContactPage({ params }: ContactPageProps) {
+  const { locale } = await params;
+
+  if (!isLocale(locale)) {
+    notFound();
+  }
+
+  const content = getContent(locale);
+
   return (
     <main className="relative min-h-screen overflow-hidden text-foreground">
       <div className="relative z-10">
@@ -59,7 +52,7 @@ export default function ContactPage() {
         <section className="mx-auto flex min-h-[calc(100vh-7rem)] w-[90%] max-w-[1440px] items-center py-10">
           <div className="w-full max-w-xl">
             <h1 className="font-anton-sc text-6xl uppercase leading-none sm:text-8xl lg:text-[10rem]">
-              Contact
+              {content.contact.title}
             </h1>
 
             <div className="mt-10 flex w-full flex-col gap-4">

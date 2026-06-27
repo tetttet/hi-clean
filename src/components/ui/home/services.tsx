@@ -4,10 +4,10 @@ import { FC, useContext, useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Image from "next/image";
-import { SERVICES } from "@/constants/projects";
 import { TextReveal } from "@/components/common/text-reveal";
 import { DiagonalReveal } from "@/components/common/image-reveal";
 import { LoadingContext } from "@/components/layout";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +15,7 @@ const Services = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const { isLoading, animationComplete } = useContext(LoadingContext);
+  const content = useSiteContent().home.services;
 
   function initializeGSAP() {
     const ctx = gsap.context(() => {
@@ -80,7 +81,7 @@ const Services = () => {
           <div className="flex items-center justify-between">
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
               <TextReveal splitType="lines" direction="up" duration={0.7}>
-                (What we do)
+                {content.eyebrow}
               </TextReveal>
             </p>
             <p className="font-gambetta text-xl text-muted sm:text-2xl">
@@ -105,15 +106,11 @@ const Services = () => {
                 stagger={0.05}
                 delay={0.2}
               >
-                Services
+                {content.title}
               </TextReveal>
             </h2>
             <p className="mt-6 max-w-5xl text-3xl font-semibold leading-[120%] sm:text-5xl lg:text-[3.75rem]">
-              {[
-                "Practical cleaning packages",
-                "for everyday homes, deep resets,",
-                "and move-in-ready spaces.",
-              ].map((line, i) => (
+              {content.lines.map((line, i) => (
                 <TextReveal
                   splitType="lines"
                   direction="up"
@@ -130,7 +127,7 @@ const Services = () => {
         </header>
 
         <div>
-          {SERVICES.map((service, i) => (
+          {content.cards.map((service, i) => (
             <ServiceCard
               key={service.title.join("-")}
               {...service}

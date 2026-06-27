@@ -1,0 +1,142 @@
+Интернационализация маршрутизатора приложений Next.js (i18n)
+Предпочитаете посмотреть видео?
+
+Настройте next-intl
+Начало работы
+Если вы еще этого не сделали, создайте приложение Next.js, использующее App Router, и запустите:
+
+npm install next-intl
+
+Теперь мы собираемся создать следующую файловую структуру:
+
+├── messages
+│   ├── en.json
+│   └── ...
+├── next.config.ts
+└── src
+    ├── i18n
+    │   └── request.ts
+    └── app
+        ├── layout.tsx
+        └── page.tsx
+
+Давайте настроим файлы:
+
+messages/en.json
+Сообщения представляют собой переводы, доступные на каждом языке, и могут предоставляться локально или загружаться из удаленного источника данных.
+
+Самый простой вариант — добавить файлы JSON в локальную папку проекта:
+
+сообщения/en.json
+{
+  "HomePage": {
+    "title": "Hello world!"
+  }
+}
+
+i18n/request.ts
+next-intlсоздает объект конфигурации с областью действия запроса, который можно использовать для предоставления сообщений и других параметров в зависимости от местоположения пользователя компонентам сервера.
+
+src/i18n/request.ts
+import {getRequestConfig} from 'next-intl/server';
+ 
+export default getRequestConfig(async () => {
+  // Static for now, we'll change this later
+  const locale = 'en';
+ 
+  return {
+    locale,
+    messages: (await import(`../../messages/${locale}.json`)).default
+  };
+});
+
+next.config.ts
+Теперь настройте плагин, который связывает вашi18n/request.ts файл сnext-intl .
+
+следующая.конфигурация.ts
+import {NextConfig} from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+ 
+const nextConfig: NextConfig = {};
+ 
+const withNextIntl = createNextIntlPlugin();
+export default withNextIntl(nextConfig);
+
+app/layout.tsx
+Чтобы сделать конфигурацию запроса доступной для клиентских компонентов, вы можете обернутьchildren ее в корневой макет с помощьюNextIntlClientProvider .
+
+приложение/макет.tsx
+import {NextIntlClientProvider} from 'next-intl';
+ 
+type Props = {
+  children: React.ReactNode;
+};
+ 
+export default async function RootLayout({children}: Props) {
+  return (
+    <html>
+      <body>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}
+
+app/page.tsx
+Используйте переводы в компонентах вашей страницы или где-либо еще!
+
+приложение/страница.tsx
+import {useTranslations} from 'next-intl';
+ 
+export default function HomePage() {
+  const t = useTranslations('HomePage');
+  return <h1>{t('title')}</h1>;
+}
+
+В случае асинхронных компонентов вместо этого можно использовать функцию awaitablegetTranslations:
+
+приложение/страница.tsx
+import {getTranslations} from 'next-intl/server';
+ 
+export default async function HomePage() {
+  const t = await getTranslations('HomePage');
+  return <h1>{t('title')}</h1>;
+}
+
+Следующие шаги
+Маршрутизация на основе локали
+If you’d like to use unique pathnames for every language that your app supports (e.g. /en/about or example.de/über-uns), you can continue to set up a top-level [locale] segment for your app.
+
+Set up locale-based routing
+→
+Provide a locale
+If your app doesn’t require unique pathnames per locale, you can provide a locale to next-intl based on user preferences or other application logic.
+
+The simplest option is to use a cookie:
+
+src/i18n/request.ts
+import {cookies} from 'next/headers';
+import {getRequestConfig} from 'next-intl/server';
+ 
+export default getRequestConfig(async () => {
+  const store = await cookies();
+  const locale = store.get('locale')?.value || 'en';
+ 
+  return {
+    locale
+    // ...
+  };
+});
+
+Internationalization isn’t just translating words
+next-intl provides the essential foundation for internationalization in Next.js apps. It handles aspects like translations, date and number formatting, as well as internationalized routing.
+
+However, building for a global audience spans a wider range of topics:
+
+Choosing the right architecture and routing strategy for your app
+Интеграция с серверными службами или CMS
+Использование генеративного ИИ для локализации контента
+Оптимизация рабочего процесса разработки с помощью инструментов TypeScript и IDE
+Сотрудничество с вашей командой с использованием системы управления переводами
+Понимание всех частей, которые способствуют по-настоящему локальному опыту
+Освоение SEO для многоязычных приложений для охвата глобальной аудитории

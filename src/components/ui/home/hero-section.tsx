@@ -10,22 +10,15 @@ import { TextReveal } from "@/components/common/text-reveal";
 import { DiagonalReveal } from "@/components/common/image-reveal";
 import { LoadingContext } from "@/components/layout";
 import Navigation from "@/components/common/navigation";
+import { useSiteContent } from "@/i18n/use-site-content";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const trustPoints = [
-  "Apartment cleaning",
-  "House cleaning",
-  "Deep cleaning",
-  "Move-in refresh",
-  "Window care",
-  "Guest-ready reset",
-];
 
 const HeroSection = () => {
   const containerRef = useRef<HTMLElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const { isLoading, animationComplete } = useContext(LoadingContext);
+  const content = useSiteContent().home.hero;
 
   useGSAP(
     () => {
@@ -93,7 +86,7 @@ const HeroSection = () => {
             <Image
               ref={imageRef}
               src={hero_banner}
-              alt="HI-Clean team in a bright home"
+              alt={content.imageAlt}
               className="h-full w-full object-cover"
               priority
               quality={95}
@@ -112,7 +105,7 @@ const HeroSection = () => {
           <div className="px-6 pb-12 pt-12 sm:px-10 lg:px-[4.5rem] lg:pt-[4.37rem]">
             <p className="mb-6 font-gambetta text-xl text-muted">
               <TextReveal splitType="lines" direction="up" duration={0.7}>
-                (Apartments and houses)
+                {content.eyebrow}
               </TextReveal>
             </p>
 
@@ -139,11 +132,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="mt-14 max-w-2xl text-3xl font-semibold leading-[130%] sm:text-4xl lg:mt-24">
-              {[
-                "Bright, reliable cleaning for",
-                "apartments and houses that",
-                "need to feel fresh again.",
-              ].map((line, index) => (
+              {content.headlineLines.map((line, index) => (
                 <TextReveal
                   splitType="lines"
                   direction="up"
@@ -162,37 +151,28 @@ const HeroSection = () => {
             <div>
               <span className="mb-6 block font-gambetta text-2xl leading-none text-muted">
                 <TextReveal splitType="lines" direction="up" duration={0.7}>
-                  (About Us)
+                  {content.aboutEyebrow}
                 </TextReveal>
               </span>
               <h2 className="mb-6 flex flex-col font-anton-sc text-5xl uppercase leading-[110%] sm:text-6xl lg:text-[4.25rem]">
-                <TextReveal
-                  splitType="chars"
-                  direction="up"
-                  duration={0.7}
-                  stagger={0.05}
-                >
-                  Clean Homes,
-                </TextReveal>
-                <TextReveal
-                  splitType="chars"
-                  direction="up"
-                  duration={0.7}
-                  stagger={0.05}
-                  delay={0.15}
-                >
-                  Calm Days
-                </TextReveal>
+                {content.aboutTitle.map((line, index) => (
+                  <TextReveal
+                    key={line}
+                    splitType="chars"
+                    direction="up"
+                    duration={0.7}
+                    stagger={0.05}
+                    delay={index * 0.15}
+                  >
+                    {line}
+                  </TextReveal>
+                ))}
               </h2>
 
               <p className="flex max-w-2xl flex-col gap-7 text-lg font-normal leading-[170%] text-muted sm:text-xl">
-                <span>
-                  {[
-                    "HI-Clean is built for people who want their home",
-                    "to feel cared for without managing every small detail.",
-                    "Our team handles regular cleaning, deep refreshes,",
-                    "and move-in work with a simple, careful process.",
-                  ].map((line, i) => (
+                {content.aboutParagraphs.map((paragraph, paragraphIndex) => (
+                  <span key={`about-${paragraphIndex}`}>
+                    {paragraph.map((line, i) => (
                     <TextReveal
                       splitType="lines"
                       direction="up"
@@ -203,38 +183,21 @@ const HeroSection = () => {
                     >
                       {line}
                     </TextReveal>
-                  ))}
-                </span>
-                <span>
-                  {[
-                    "We focus on the rooms that shape daily life:",
-                    "kitchens, bathrooms, floors, windows, and all the",
-                    "quiet corners that make a space feel truly finished.",
-                  ].map((line, i) => (
-                    <TextReveal
-                      splitType="lines"
-                      direction="up"
-                      duration={0.7}
-                      stagger={0.08}
-                      delay={i * 0.05}
-                      key={line}
-                    >
-                      {line}
-                    </TextReveal>
-                  ))}
-                </span>
+                    ))}
+                  </span>
+                ))}
               </p>
             </div>
 
             <div>
               <span className="mb-6 block font-gambetta text-2xl leading-none text-muted">
                 <TextReveal splitType="lines" direction="up" duration={0.7}>
-                  (What we take care of)
+                  {content.careEyebrow}
                 </TextReveal>
               </span>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {trustPoints.map((point, index) => (
+                {content.trustPoints.map((point, index) => (
                   <div
                     key={point}
                     className="border border-line bg-inverse-2 px-4 py-5 text-base font-semibold leading-[130%] shadow-[0_16px_50px_rgba(21,26,23,0.05)]"
