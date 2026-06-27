@@ -58,6 +58,16 @@ type PriceSummary = {
   lines: { label: string; value: string }[];
 };
 
+type EstimateContentProps = {
+  formData: WizardFormData;
+  selectedService: Service;
+  selectedOption: PriceOption;
+  selectedDuration: (typeof cleaningDurations)[number];
+  selectedPayment: (typeof paymentMethods)[number];
+  selectedFrequency: (typeof frequencyOptions)[number];
+  priceSummary: PriceSummary;
+};
+
 const wizardSteps = ["Location", "Service", "Home", "Contact"];
 
 const initialFormData: WizardFormData = {
@@ -167,6 +177,10 @@ export default function ServicesPageInject() {
   const [isSent, setIsSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isMobileEstimateOpen, setIsMobileEstimateOpen] = useState(false);
+  const [isLocationEstimateVisible, setIsLocationEstimateVisible] =
+    useState(false);
+  const locationEstimateRef = useRef<HTMLDivElement>(null);
 
   const selectedService = useMemo(
     () =>
@@ -240,6 +254,36 @@ export default function ServicesPageInject() {
     lastFocusedRequestId.current = focusRequestId;
   }, [activeStep, fieldErrors, focusRequestId]);
 
+  useEffect(() => {
+    if (activeStep !== 0) {
+      return;
+    }
+
+    const estimateElement = locationEstimateRef.current;
+
+    if (!estimateElement || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsLocationEstimateVisible(Boolean(entry?.isIntersecting));
+      },
+      {
+        rootMargin: "0px 0px -12% 0px",
+        threshold: 0.2,
+      }
+    );
+
+    observer.observe(estimateElement);
+
+    return () => observer.disconnect();
+  }, [activeStep]);
+
+  const showMobilePriceDock =
+    activeStep !== 0 || !isLocationEstimateVisible;
+
   const resetValidationFeedback = () => {
     setFieldErrors({});
   };
@@ -299,6 +343,8 @@ export default function ServicesPageInject() {
 
   const goToStep = (step: number) => {
     setActiveStep(step);
+    setIsMobileEstimateOpen(false);
+    setIsLocationEstimateVisible(false);
     resetValidationFeedback();
   };
 
@@ -315,8 +361,7 @@ export default function ServicesPageInject() {
       return;
     }
 
-    setActiveStep((current) => Math.min(current + 1, wizardSteps.length - 1));
-    resetValidationFeedback();
+    goToStep(Math.min(activeStep + 1, wizardSteps.length - 1));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -331,6 +376,8 @@ export default function ServicesPageInject() {
     if (invalidStep >= 0) {
       setFieldErrors(getStepErrors(invalidStep, formData, selectedOption));
       setActiveStep(invalidStep);
+      setIsMobileEstimateOpen(false);
+      setIsLocationEstimateVisible(false);
       requestErrorFocus();
       setSubmitError("");
       return;
@@ -399,7 +446,7 @@ export default function ServicesPageInject() {
       <div className="relative z-10">
         <Navigation tone="dark" compact />
 
-        <section className="mx-auto w-[90%] max-w-[1440px] pb-6 lg:pb-10">
+        <section className="mx-auto w-[90%] max-w-[1440px] pb-28 lg:pb-10">
           <CompactHeader
             selectedService={selectedService}
             selectedOption={selectedOption}
@@ -526,18 +573,44 @@ export default function ServicesPageInject() {
               </div>
             </form>
 
-            <EstimatePanel
-              formData={formData}
-              selectedService={selectedService}
-              selectedOption={selectedOption}
-              selectedDuration={selectedDuration}
-              selectedPayment={selectedPayment}
-              selectedFrequency={selectedFrequency}
-              priceSummary={priceSummary}
-            />
+            {activeStep === 0 ? (
+              <div ref={locationEstimateRef} className="lg:hidden">
+                <MobileEstimatePanel
+                  formData={formData}
+                  selectedService={selectedService}
+                  selectedOption={selectedOption}
+                  selectedDuration={selectedDuration}
+                  selectedPayment={selectedPayment}
+                  selectedFrequency={selectedFrequency}
+                  priceSummary={priceSummary}
+                  isOpen={isMobileEstimateOpen}
+                  onToggle={() =>
+                    setIsMobileEstimateOpen((current) => !current)
+                  }
+                />
+              </div>
+            ) : null}
+
+            <div className="hidden lg:block">
+              <EstimatePanel
+                formData={formData}
+                selectedService={selectedService}
+                selectedOption={selectedOption}
+                selectedDuration={selectedDuration}
+                selectedPayment={selectedPayment}
+                selectedFrequency={selectedFrequency}
+                priceSummary={priceSummary}
+              />
+            </div>
           </div>
         </section>
       </div>
+
+      <MobilePriceDock
+        priceSummary={priceSummary}
+        selectedService={selectedService}
+        isVisible={showMobilePriceDock}
+      />
     </main>
   );
 }
@@ -569,7 +642,7 @@ function CompactHeader({
   priceSummary: PriceSummary;
 }) {
   return (
-    <header className="rounded-lg border border-[#f7f8f4]/14 bg-[#f7f8f4]/9 p-3 backdrop-blur-md sm:p-4">
+    <header className="hidden lg:block rounded-lg border border-[#f7f8f4]/14 bg-[#f7f8f4]/9 p-3 backdrop-blur-md sm:p-4">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
           <p className="font-gambetta text-base text-[#f7f8f4]/62">
@@ -664,7 +737,7 @@ function StepTabs({
   setActiveStep: (step: number) => void;
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-4 gap-1 sm:gap-2">
       {wizardSteps.map((step, index) => (
         <button
           key={step}
@@ -672,7 +745,7 @@ function StepTabs({
           onClick={() => {
             if (index <= activeStep) setActiveStep(index);
           }}
-          className={`h-10 rounded-md border px-3 text-left text-xs font-black transition ${
+          className={`h-9 min-w-0 rounded-md border px-1 text-center text-[10px] font-black leading-tight transition sm:h-10 sm:px-3 sm:text-left sm:text-xs ${
             index === activeStep
               ? "border-accent bg-accent text-white"
               : index < activeStep
@@ -680,7 +753,9 @@ function StepTabs({
                 : "border-[#151a17]/10 bg-white/70 text-[#151a17]/48"
           }`}
         >
-          {index + 1}. {step}
+          <span className="block truncate">
+            {index + 1}. {step}
+          </span>
         </button>
       ))}
     </div>
@@ -1190,15 +1265,7 @@ function EstimatePanel({
   selectedPayment,
   selectedFrequency,
   priceSummary,
-}: {
-  formData: WizardFormData;
-  selectedService: Service;
-  selectedOption: PriceOption;
-  selectedDuration: (typeof cleaningDurations)[number];
-  selectedPayment: (typeof paymentMethods)[number];
-  selectedFrequency: (typeof frequencyOptions)[number];
-  priceSummary: PriceSummary;
-}) {
+}: EstimateContentProps) {
   return (
     <aside className={`${panelClass} overflow-hidden`}>
       <div className="bg-[#151a17] p-4 text-[#f7f8f4]">
@@ -1210,45 +1277,163 @@ function EstimatePanel({
         </p>
       </div>
 
-      <div className="space-y-4 p-4">
-        <dl className="space-y-2">
-          <SummaryRow label="Service" value={selectedService.title} />
-          <SummaryRow label="Package" value={selectedOption.label} />
-          <SummaryRow label="Duration" value={selectedDuration.hours} />
-          <SummaryRow label="Payment" value={selectedPayment.label} />
-          <SummaryRow label="Plan" value={selectedFrequency.label} />
-          <SummaryRow label="Rooms" value={formData.rooms || "-"} />
-        </dl>
+      <EstimateDetails
+        formData={formData}
+        selectedService={selectedService}
+        selectedOption={selectedOption}
+        selectedDuration={selectedDuration}
+        selectedPayment={selectedPayment}
+        selectedFrequency={selectedFrequency}
+        priceSummary={priceSummary}
+      />
+    </aside>
+  );
+}
 
-        <div className="rounded-md border border-[#151a17]/10 bg-[#d0a850]/16 p-3">
-          <p className="text-sm font-black">Included</p>
-          <ul className="mt-2 space-y-2">
-            {selectedService.includes.slice(0, 3).map((item) => (
-              <li
-                key={item}
-                className="flex gap-2 text-xs font-semibold leading-5 text-[#151a17]/64"
-              >
-                <span className="mt-2 block h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+function MobilePriceDock({
+  priceSummary,
+  selectedService,
+  isVisible,
+}: {
+  priceSummary: PriceSummary;
+  selectedService: Service;
+  isVisible: boolean;
+}) {
+  return (
+    <div
+      aria-hidden={!isVisible}
+      className={`fixed bottom-4 left-4 z-40 lg:hidden transition duration-300 ${
+        isVisible
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none translate-y-3 opacity-0"
+      }`}
+    >
+      <div className="max-w-[11.75rem] rounded-md border border-[#f7f8f4]/16 bg-[#151a17]/95 px-3.5 py-3 text-[#f7f8f4] shadow-[0_16px_50px_rgba(0,0,0,0.32)] backdrop-blur-md">
+        <p className="truncate text-[10px] font-black uppercase leading-none tracking-[0.12em] text-[#d0a850]">
+          {selectedService.title}
+        </p>
+        <p className="mt-1 font-anton-sc text-2xl uppercase leading-none text-[#d0a850]">
+          {priceSummary.totalLabel}
+        </p>
+      </div>
+    </div>
+  );
+}
 
+function MobileEstimatePanel({
+  formData,
+  selectedService,
+  selectedOption,
+  selectedDuration,
+  selectedPayment,
+  selectedFrequency,
+  priceSummary,
+  isOpen,
+  onToggle,
+}: EstimateContentProps & {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <aside className={`${panelClass} overflow-hidden`}>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault();
+          onToggle();
+        }}
+        aria-expanded={isOpen}
+        aria-controls="mobile-estimate-details"
+        className="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_2.5rem] items-center gap-3 bg-[#151a17] p-4 text-left text-[#f7f8f4]"
+      >
+        <span className="min-w-0">
+          <span className="block text-xs font-black uppercase tracking-[0.12em] text-[#d0a850]">
+            Estimate
+          </span>
+          <span className="mt-2 block truncate font-anton-sc text-4xl uppercase leading-none text-[#d0a850]">
+            {priceSummary.totalLabel}
+          </span>
+        </span>
+        <span
+          aria-hidden="true"
+          className={`grid h-10 w-10 place-items-center rounded-md border border-[#f7f8f4]/18 bg-[#f7f8f4]/8 text-xl font-black text-[#d0a850] transition duration-300 ${
+            isOpen ? "rotate-90" : ""
+          }`}
+        >
+          &gt;
+        </span>
+      </button>
+
+      <div
+        id="mobile-estimate-details"
+        className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
+          isOpen ? "max-h-[34rem] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
         <div>
-          <p className="text-sm font-black">Breakdown</p>
-          <dl className="mt-2 space-y-2">
-            {priceSummary.lines.slice(0, 4).map((line) => (
-              <SummaryRow
-                key={`${line.label}-${line.value}`}
-                label={line.label}
-                value={line.value}
-              />
-            ))}
-          </dl>
+          <EstimateDetails
+            formData={formData}
+            selectedService={selectedService}
+            selectedOption={selectedOption}
+            selectedDuration={selectedDuration}
+            selectedPayment={selectedPayment}
+            selectedFrequency={selectedFrequency}
+            priceSummary={priceSummary}
+          />
         </div>
       </div>
     </aside>
+  );
+}
+
+function EstimateDetails({
+  formData,
+  selectedService,
+  selectedOption,
+  selectedDuration,
+  selectedPayment,
+  selectedFrequency,
+  priceSummary,
+}: EstimateContentProps) {
+  return (
+    <div className="space-y-4 p-4">
+      <dl className="space-y-2">
+        <SummaryRow label="Service" value={selectedService.title} />
+        <SummaryRow label="Package" value={selectedOption.label} />
+        <SummaryRow label="Duration" value={selectedDuration.hours} />
+        <SummaryRow label="Payment" value={selectedPayment.label} />
+        <SummaryRow label="Plan" value={selectedFrequency.label} />
+        <SummaryRow label="Rooms" value={formData.rooms || "-"} />
+      </dl>
+
+      <div className="rounded-md border border-[#151a17]/10 bg-[#d0a850]/16 p-3">
+        <p className="text-sm font-black">Included</p>
+        <ul className="mt-2 space-y-2">
+          {selectedService.includes.slice(0, 3).map((item) => (
+            <li
+              key={item}
+              className="flex gap-2 text-xs font-semibold leading-5 text-[#151a17]/64"
+            >
+              <span className="mt-2 block h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p className="text-sm font-black">Breakdown</p>
+        <dl className="mt-2 space-y-2">
+          {priceSummary.lines.slice(0, 4).map((line) => (
+            <SummaryRow
+              key={`${line.label}-${line.value}`}
+              label={line.label}
+              value={line.value}
+            />
+          ))}
+        </dl>
+      </div>
+    </div>
   );
 }
 

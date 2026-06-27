@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { SOCIAL_LINKS } from "@/constants/social-links";
 
@@ -82,7 +83,12 @@ const SOCIAL_ACTIONS = [
 ] as const;
 
 export const SocialFloatingButton = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  if (pathname === "/services" || pathname.startsWith("/services/")) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-5 right-5 z-[70] flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
