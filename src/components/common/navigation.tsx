@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 import { FlipLink } from "./flip-link";
 import { useSiteContent } from "@/i18n/use-site-content";
@@ -51,25 +50,29 @@ const Navigation = ({
     },
   ];
   const contactHref = withLocale(locale, "/contact");
+  const navFrameClass = isHomePage
+    ? "flex items-center justify-between gap-3 px-6 pt-8 sm:gap-6 sm:px-10 lg:px-[4.5rem] lg:pt-12"
+    : `mx-auto grid w-[94%] max-w-[1440px] grid-cols-[auto_auto] items-center gap-x-3 gap-y-3 sm:flex sm:w-[90%] sm:justify-between sm:gap-6 ${
+        compact ? "py-3 sm:py-4" : "py-7 sm:py-10"
+      }`;
+  const mobileDividerClass =
+    tone === "dark" ? "border-[#f7f8f4]/14" : "border-[#151a17]/10";
+  const navListClass = isHomePage
+    ? "flex items-center gap-3 text-sm font-semibold sm:gap-6 sm:text-base"
+    : `col-span-2 flex w-full items-center justify-center gap-4 border-t pt-3 text-xs font-semibold sm:w-auto sm:border-t-0 sm:pt-0 sm:text-base sm:gap-6 ${mobileDividerClass}`;
 
   return (
-    <nav
-      className={`flex items-center justify-between gap-6 ${
-        isHomePage
-          ? "px-6 pt-8 sm:px-10 lg:px-[4.5rem] lg:pt-12"
-          : `mx-auto w-[90%] max-w-[1440px] ${compact ? "py-4" : "py-10"}`
-      }`}
-    >
+    <nav className={navFrameClass}>
       {!isHomePage && (
         <FlipLink
           href={withLocale(locale, "/")}
-          className={`font-anton-sc text-3xl uppercase leading-none ${linkClass}`}
+          className={`font-anton-sc text-2xl uppercase leading-none sm:text-3xl ${linkClass}`}
         >
           HI-<span className="text-[#d0a850]">Clean</span>
         </FlipLink>
       )}
 
-      <ul className="flex items-center gap-3 text-sm font-semibold sm:gap-6 sm:text-base">
+      <ul className={navListClass}>
         {navItems.map((item) => (
           <li key={item.href} className="leading-none">
             <FlipLink
@@ -83,7 +86,7 @@ const Navigation = ({
         ))}
       </ul>
 
-      <div className="flex items-center gap-3 text-sm font-semibold leading-none sm:gap-4 sm:text-base">
+      <div className="col-start-2 row-start-1 flex items-center justify-self-end text-sm font-semibold leading-none sm:col-auto sm:row-auto sm:gap-4 sm:text-base">
         <div className="hidden list-none sm:block">
           <FlipLink
             href={contactHref}
@@ -115,37 +118,46 @@ function LanguageSwitcher({
   tone: "default" | "dark";
 }) {
   const pathname = usePathname();
-  const baseClass =
+  const router = useRouter();
+  const selectClass =
     tone === "dark"
-      ? "border-[#f7f8f4]/24 text-[#f7f8f4]/72 hover:border-[#d0a850] hover:text-[#d0a850]"
-      : "border-[#151a17]/16 text-[#151a17]/58 hover:border-accent hover:text-accent";
-  const activeClass =
+      ? "border-[#f7f8f4]/24 bg-[#f7f8f4]/8 text-[#f7f8f4] focus:border-[#d0a850] focus:ring-[#d0a850]/20"
+      : "border-[#151a17]/16 bg-white/70 text-[#151a17] focus:border-accent focus:ring-accent/20";
+  const arrowClass =
     tone === "dark"
-      ? "border-[#d0a850] bg-[#d0a850] text-[#151a17]"
-      : "border-[#151a17] bg-[#151a17] text-[#f7f8f4]";
+      ? "text-[#f7f8f4]/72"
+      : "text-[#151a17]/58";
 
   return (
-    <div
-      aria-label={label}
-      className="flex shrink-0 overflow-hidden rounded-md border border-current/10 text-[10px] font-black uppercase leading-none sm:text-xs"
-    >
-      {locales.map((locale) => {
-        const isActive = locale === currentLocale;
-
-        return (
-          <Link
-            key={locale}
-            href={switchLocalePath(pathname, locale)}
-            hrefLang={locale}
-            aria-current={isActive ? "true" : undefined}
-            className={`px-2.5 py-2 transition sm:px-3 ${
-              isActive ? activeClass : baseClass
-            }`}
-          >
+    <label className="relative block shrink-0" aria-label={label}>
+      <select
+        aria-label={label}
+        value={currentLocale}
+        onChange={(event) => {
+          router.push(switchLocalePath(pathname, event.target.value as Locale));
+        }}
+        className={`h-9 w-16 appearance-none rounded-md border px-3 pr-8 text-xs font-black uppercase leading-none outline-none transition focus:ring-4 ${selectClass}`}
+      >
+        {locales.map((locale) => (
+          <option key={locale} value={locale} className="text-[#151a17]">
             {localeLabels[locale]}
-          </Link>
-        );
-      })}
-    </div>
+          </option>
+        ))}
+      </select>
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 ${arrowClass}`}
+      >
+        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
+          <path
+            d="M4 6l4 4 4-4"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+          />
+        </svg>
+      </span>
+    </label>
   );
 }

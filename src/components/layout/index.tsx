@@ -2,7 +2,7 @@
 
 import { ReactLenis } from "lenis/react";
 import "lenis/dist/lenis.css";
-import { FC, ReactNode, createContext, useState } from "react";
+import { FC, ReactNode, createContext, useCallback, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Preloader } from "../common/preloader";
 
@@ -14,6 +14,9 @@ export const LoadingContext = createContext({
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [animationComplete, setAnimationComplete] = useState(false);
+  const handlePreloaderComplete = useCallback(() => {
+    setIsLoading(false);
+  }, []);
 
   const contentVariants = {
     hidden: {
@@ -34,7 +37,7 @@ const Layout: FC<{ children: ReactNode }> = ({ children }) => {
     <LoadingContext.Provider value={{ isLoading, animationComplete }}>
       <main className="min-h-screen bg-background text-foreground">
         <ReactLenis root options={{ lerp: 0.08, wheelMultiplier: 0.9 }}>
-          <Preloader onComplete={() => setIsLoading(false)} />
+          {isLoading && <Preloader onComplete={handlePreloaderComplete} />}
           <AnimatePresence mode="wait">
             {!isLoading && (
               <motion.div

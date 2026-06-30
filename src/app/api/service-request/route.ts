@@ -19,7 +19,7 @@ type ServiceRequestPayload = {
     email: string;
     address: string;
   };
-  duration: string;
+  speed: string;
   payment: string;
   frequency: string;
   addOns: string[];
@@ -157,7 +157,7 @@ Service: ${clean(payload.service)}
 Package: ${clean(payload.package)}
 Package detail: ${clean(payload.packageDetail)}
 Estimate: ${clean(payload.estimate)}
-Duration: ${clean(payload.duration)}
+Speed: ${clean(payload.speed)}
 Payment: ${clean(payload.payment)}
 Frequency: ${clean(payload.frequency)}
 

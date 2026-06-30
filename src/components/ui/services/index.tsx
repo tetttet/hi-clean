@@ -145,6 +145,14 @@ const fieldFocusOrder: (keyof WizardFormData)[] = [
   "approval",
 ];
 
+const hiddenServiceMenuIds = new Set([
+  "koltuk-yikama",
+  "yatak-yikama",
+  "sandalye-yikama",
+  "puf-yikama",
+  "hali-yikama",
+]);
+
 export default function ServicesPageInject() {
   const servicesPage = useSiteContent().servicesPage;
   const { priceData, ui } = servicesPage;
@@ -414,7 +422,7 @@ export default function ServicesPageInject() {
             email: formData.email.trim(),
             address: formData.address.trim(),
           },
-          duration: `${selectedDuration.label} (${selectedDuration.hours})`,
+          speed: `${selectedDuration.label} (${selectedDuration.hours})`,
           payment: `${selectedPayment.label} - ${selectedPayment.description}`,
           frequency: selectedFrequency.label,
           addOns: selectedAddOns.map((item) => item.label),
@@ -686,6 +694,9 @@ function ServiceMenu({
   onSelectService: (serviceId: string) => void;
 }) {
   const { priceData, ui } = useSiteContent().servicesPage;
+  const menuServices = priceData.services.filter(
+    (service) => !hiddenServiceMenuIds.has(service.id)
+  );
 
   return (
     <aside className={`${panelClass} overflow-hidden`}>
@@ -696,7 +707,7 @@ function ServiceMenu({
         <h2 className="mt-1 text-lg font-black">{ui.serviceMenu.title}</h2>
       </div>
       <div className="grid gap-2 p-3">
-        {priceData.services.map((service) => {
+        {menuServices.map((service) => {
           const isSelected = service.id === selectedService.id;
 
           return (
@@ -931,18 +942,11 @@ function ServiceStep({
         <FieldError id="package-options-error" message={packageError} />
       </div>
 
-      <SegmentGroup
-        id="duration-options"
+      <SpeedUpgradeButton
         title={ui.steps.service.duration}
-        error={fieldErrors.cleaningDurationId}
-        items={priceData.cleaningDurations.map((duration) => ({
-          id: duration.id,
-          title: duration.label,
-          text: duration.hours,
-        }))}
-        mobileColumns={3}
+        options={priceData.cleaningDurations}
         selectedId={formData.cleaningDurationId}
-        onSelect={(id) => updateField("cleaningDurationId", id)}
+        onToggle={(id) => updateField("cleaningDurationId", id)}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -1495,6 +1499,66 @@ function EstimateDetails({
   );
 }
 
+function SpeedUpgradeButton({
+  title,
+  options,
+  selectedId,
+  onToggle,
+}: {
+  title: string;
+  options: CleaningDuration[];
+  selectedId: string;
+  onToggle: (id: string) => void;
+}) {
+  const standardOption = options[0];
+  const fastOption = options[1] ?? options[0];
+  const isFastSelected = selectedId === fastOption.id;
+
+  if (!standardOption || !fastOption) {
+    return null;
+  }
+
+  return (
+    <div id="duration-options" tabIndex={-1} className="rounded-md outline-none">
+      <p className="text-sm font-bold text-[#151a17]">{title}</p>
+      <button
+        type="button"
+        aria-pressed={isFastSelected}
+        onClick={() =>
+          onToggle(isFastSelected ? standardOption.id : fastOption.id)
+        }
+        className={`mt-2 grid min-h-20 w-full grid-cols-[1fr_auto] items-center gap-3 rounded-md border p-3 text-left transition ${
+          isFastSelected
+            ? "border-[#151a17] bg-[#151a17] text-[#f7f8f4]"
+            : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-[#151a17]"
+        }`}
+      >
+        <span className="grid gap-1">
+          <span className="text-sm font-black leading-tight">
+            {fastOption.label}
+          </span>
+          <span
+            className={`text-xs font-semibold leading-5 ${
+              isFastSelected ? "text-[#f7f8f4]/64" : "text-[#151a17]/52"
+            }`}
+          >
+            {fastOption.description}
+          </span>
+        </span>
+        <span
+          className={`rounded-md px-3 py-2 text-xs font-black leading-none ${
+            isFastSelected
+              ? "bg-[#d0a850] text-[#151a17]"
+              : "bg-[#151a17]/8 text-[#151a17]"
+          }`}
+        >
+          {fastOption.hours}
+        </span>
+      </button>
+    </div>
+  );
+}
+
 function SegmentGroup({
   id,
   title,
@@ -1703,9 +1767,6 @@ function calculatePrice({
     hasSquareMeterPricing && squareMeters > 0
       ? basePrice * squareMeters
       : basePrice;
-  const durationAdjusted = Math.round(
-    squareMeterBase * selectedDuration.multiplier
-  );
   const roomSurcharge = isWaitingForSquareMeters
     ? 0
     : Math.max(roomCount - 1, 0) * 250;
@@ -1715,18 +1776,27 @@ function calculatePrice({
   const addOnsSurcharge = isWaitingForSquareMeters
     ? 0
     : selectedAddOnsCount * 250;
-  const subtotal =
-    durationAdjusted + roomSurcharge + bathroomSurcharge + addOnsSurcharge;
+  const baseSubtotal =
+    squareMeterBase + roomSurcharge + bathroomSurcharge + addOnsSurcharge;
+  const speedSurcharge = isWaitingForSquareMeters
+    ? Math.round(basePrice * (selectedDuration.multiplier - 1))
+    : Math.round(baseSubtotal * (selectedDuration.multiplier - 1));
+  const subtotal = baseSubtotal + speedSurcharge;
   const discount = Math.round(subtotal * selectedFrequency.discount);
   const total = subtotal - discount;
+  const fromPrice = Math.round(basePrice * selectedDuration.multiplier);
+  const speedValue =
+    speedSurcharge > 0
+      ? `${selectedDuration.label} (+${formatCurrency(speedSurcharge)})`
+      : selectedDuration.label;
 
   return {
     totalLabel: isWaitingForSquareMeters
-      ? `${priceCopy.from} ${formatCurrency(basePrice)} ${priceCopy.perM2}`
+      ? `${priceCopy.from} ${formatCurrency(fromPrice)} ${priceCopy.perM2}`
       : formatCurrency(total),
     lines: [
       { label: priceCopy.base, value: selectedOption.price },
-      { label: priceCopy.duration, value: selectedDuration.label },
+      { label: priceCopy.duration, value: speedValue },
       { label: priceCopy.rooms, value: String(roomCount) },
       { label: priceCopy.bathrooms, value: String(bathroomCount) },
       { label: priceCopy.extras, value: String(selectedAddOnsCount) },
@@ -1768,10 +1838,6 @@ function getStepErrors(
 
     if (!hasText(formData.optionId)) {
       errors.optionId = validation.packageRequired;
-    }
-
-    if (!hasText(formData.cleaningDurationId)) {
-      errors.cleaningDurationId = validation.durationRequired;
     }
 
     if (!hasText(formData.frequencyId)) {
