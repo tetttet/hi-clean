@@ -217,6 +217,7 @@ export default function ServicesPageInject() {
     () =>
       calculatePrice({
         formData,
+        selectedService,
         selectedOption,
         selectedDuration,
         selectedFrequency,
@@ -229,6 +230,7 @@ export default function ServicesPageInject() {
       selectedDuration,
       selectedFrequency,
       selectedOption,
+      selectedService,
       ui.price,
     ]
   );
@@ -716,27 +718,27 @@ function ServiceMenu({
               type="button"
               aria-pressed={isSelected}
               onClick={() => onSelectService(service.id)}
-              className={`rounded-md border p-3 text-left transition ${
+              className={`min-w-0 rounded-md border p-3 text-left transition ${
                 isSelected
                   ? "border-[#151a17] bg-[#151a17] text-[#f7f8f4]"
                   : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-accent"
               }`}
             >
-              <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              <span className="grid grid-cols-[minmax(0,1fr)_minmax(4.5rem,auto)] items-center gap-3">
                 <span className="min-w-0">
                   <span
-                    className={`block text-[11px] font-black uppercase leading-none tracking-[0.08em] ${
+                    className={`block break-words text-[11px] font-black uppercase leading-tight tracking-[0.08em] hyphens-auto ${
                       isSelected ? "text-[#d0a850]" : "text-accent"
                     }`}
                   >
                     {service.category}
                   </span>
-                  <span className="mt-1 block text-sm font-black leading-snug">
+                  <span className="mt-1 block break-words text-sm font-black leading-snug hyphens-auto">
                     {service.title}
                   </span>
                 </span>
                 <span
-                  className={`min-w-[5.75rem] shrink-0 rounded-md px-2.5 py-1.5 text-center text-xs font-black leading-none ${
+                  className={`min-w-0 max-w-[6.25rem] shrink-0 whitespace-normal break-words rounded-md px-2.5 py-1.5 text-center text-xs font-black leading-tight hyphens-auto ${
                     isSelected
                       ? "bg-[#f7f8f4]/12 text-[#f7f8f4]"
                       : "bg-[#151a17]/6 text-[#151a17]"
@@ -771,7 +773,7 @@ function StepTabs({
           onClick={() => {
             if (index <= activeStep) setActiveStep(index);
           }}
-          className={`h-9 min-w-0 rounded-md border px-1 text-center text-[10px] font-black leading-tight transition sm:h-10 sm:px-3 sm:text-left sm:text-xs ${
+          className={`min-h-9 min-w-0 rounded-md border px-1 py-1 text-center text-[10px] font-black leading-tight transition sm:min-h-10 sm:px-3 sm:text-left sm:text-xs ${
             index === activeStep
               ? "border-accent bg-accent text-white"
               : index < activeStep
@@ -779,7 +781,7 @@ function StepTabs({
                 : "border-[#151a17]/10 bg-white/70 text-[#151a17]/48"
           }`}
         >
-          <span className="block truncate">
+          <span className="block whitespace-normal break-words hyphens-auto">
             {index + 1}. {step}
           </span>
         </button>
@@ -916,23 +918,23 @@ function ServiceStep({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => updateField("optionId", option.id)}
-                className={`grid min-h-28 grid-rows-[auto_1fr_auto] gap-2 rounded-md border p-3 text-left transition ${
+                className={`grid min-h-32 min-w-0 grid-rows-[auto_1fr_auto] gap-2 rounded-md border p-3 text-left transition ${
                   isSelected
                     ? "border-accent bg-accent text-white"
                     : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-accent"
                 }`}
               >
-                <span className="block text-sm font-black leading-tight">
+                <span className="block break-words text-sm font-black leading-tight hyphens-auto">
                   {option.label}
                 </span>
                 <span
-                  className={`block text-xs font-semibold leading-5 ${
+                  className={`block break-words text-xs font-semibold leading-5 hyphens-auto ${
                     isSelected ? "text-white/72" : "text-[#151a17]/52"
                   }`}
                 >
                   {option.detail}
                 </span>
-                <span className="block text-sm font-black leading-tight">
+                <span className="block whitespace-normal break-words text-sm font-black leading-tight hyphens-auto">
                   {option.price}
                 </span>
               </button>
@@ -1117,7 +1119,7 @@ function HomeStep({
             return (
               <label
                 key={service.id}
-                className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold leading-5 transition ${
+                className={`flex min-h-11 min-w-0 cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold leading-5 transition ${
                   isSelected
                     ? "border-accent bg-accent text-white"
                     : "border-[#151a17]/10 bg-white/70 text-[#151a17]/64 hover:border-accent"
@@ -1127,9 +1129,11 @@ function HomeStep({
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleAddOn(service.id)}
-                  className="h-4 w-4 rounded border-[#151a17]/30 accent-accent"
+                  className="h-4 w-4 shrink-0 rounded border-[#151a17]/30 accent-accent"
                 />
-                <span>{service.label}</span>
+                <span className="min-w-0 break-words hyphens-auto">
+                  {service.label}
+                </span>
               </label>
             );
           })}
@@ -1367,10 +1371,10 @@ function MobilePriceDock({
       }`}
     >
       <div className="max-w-[11.75rem] rounded-md border border-[#f7f8f4]/16 bg-[#151a17]/95 px-3.5 py-3 text-[#f7f8f4] shadow-[0_16px_50px_rgba(0,0,0,0.32)] backdrop-blur-md">
-        <p className="truncate text-[10px] font-black uppercase leading-none tracking-[0.12em] text-[#d0a850]">
+        <p className="break-words text-[10px] font-black uppercase leading-tight tracking-[0.12em] text-[#d0a850] hyphens-auto">
           {selectedService.title}
         </p>
-        <p className="mt-1 font-anton-sc text-2xl uppercase leading-none text-[#d0a850]">
+        <p className="mt-1 break-words font-anton-sc text-2xl uppercase leading-tight text-[#d0a850] hyphens-auto">
           {priceSummary.totalLabel}
         </p>
       </div>
@@ -1410,7 +1414,7 @@ function MobileEstimatePanel({
           <span className="block text-xs font-black uppercase tracking-[0.12em] text-[#d0a850]">
             {ui.summary.estimate}
           </span>
-          <span className="mt-2 block truncate font-anton-sc text-4xl uppercase leading-none text-[#d0a850]">
+          <span className="mt-2 block break-words font-anton-sc text-4xl uppercase leading-none text-[#d0a850] hyphens-auto">
             {priceSummary.totalLabel}
           </span>
         </span>
@@ -1527,18 +1531,18 @@ function SpeedUpgradeButton({
         onClick={() =>
           onToggle(isFastSelected ? standardOption.id : fastOption.id)
         }
-        className={`mt-2 grid min-h-20 w-full grid-cols-[1fr_auto] items-center gap-3 rounded-md border p-3 text-left transition ${
+        className={`mt-2 grid min-h-20 w-full min-w-0 grid-cols-[minmax(0,1fr)_minmax(4.75rem,auto)] items-center gap-3 rounded-md border p-3 text-left transition ${
           isFastSelected
             ? "border-[#151a17] bg-[#151a17] text-[#f7f8f4]"
             : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-[#151a17]"
         }`}
       >
-        <span className="grid gap-1">
-          <span className="text-sm font-black leading-tight">
+        <span className="grid min-w-0 gap-1">
+          <span className="break-words text-sm font-black leading-tight hyphens-auto">
             {fastOption.label}
           </span>
           <span
-            className={`text-xs font-semibold leading-5 ${
+            className={`break-words text-xs font-semibold leading-5 hyphens-auto ${
               isFastSelected ? "text-[#f7f8f4]/64" : "text-[#151a17]/52"
             }`}
           >
@@ -1546,7 +1550,7 @@ function SpeedUpgradeButton({
           </span>
         </span>
         <span
-          className={`rounded-md px-3 py-2 text-xs font-black leading-none ${
+          className={`min-w-0 max-w-[6.5rem] whitespace-normal break-words rounded-md px-3 py-2 text-center text-xs font-black leading-tight hyphens-auto ${
             isFastSelected
               ? "bg-[#d0a850] text-[#151a17]"
               : "bg-[#151a17]/8 text-[#151a17]"
@@ -1583,7 +1587,7 @@ function SegmentGroup({
         ? "grid-cols-2 sm:grid-cols-3"
         : "sm:grid-cols-3";
   const optionButtonClass =
-    mobileColumns > 1 ? "min-h-16 p-2 sm:min-h-20 sm:p-3" : "min-h-20 p-3";
+    mobileColumns > 1 ? "min-h-20 p-2 sm:min-h-20 sm:p-3" : "min-h-20 p-3";
 
   return (
     <div
@@ -1606,17 +1610,17 @@ function SegmentGroup({
               type="button"
               aria-pressed={isSelected}
               onClick={() => onSelect(item.id)}
-              className={`grid grid-rows-[auto_1fr] gap-1 rounded-md border text-left transition ${optionButtonClass} ${
+              className={`grid min-w-0 grid-rows-[auto_1fr] gap-1 rounded-md border text-left transition ${optionButtonClass} ${
                 isSelected
                   ? "border-[#151a17] bg-[#151a17] text-[#f7f8f4]"
                   : "border-[#151a17]/10 bg-white/70 text-[#151a17] hover:border-[#151a17]"
               }`}
             >
-              <span className="block text-xs font-black leading-tight">
+              <span className="block break-words text-xs font-black leading-tight hyphens-auto">
                 {item.title}
               </span>
               <span
-                className={`block text-[11px] font-semibold leading-4 ${
+                className={`block break-words text-[11px] font-semibold leading-4 hyphens-auto ${
                   isSelected ? "text-[#f7f8f4]/64" : "text-[#151a17]/50"
                 }`}
               >
@@ -1710,7 +1714,7 @@ function Metric({
         {label}
       </p>
       <p
-        className={`mt-1 truncate text-sm font-black ${
+        className={`mt-1 break-words text-sm font-black leading-tight hyphens-auto ${
           accent ? "text-[#d0a850]" : "text-[#f7f8f4]"
         }`}
       >
@@ -1733,6 +1737,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 function calculatePrice({
   formData,
+  selectedService,
   selectedOption,
   selectedDuration,
   selectedFrequency,
@@ -1740,6 +1745,7 @@ function calculatePrice({
   priceCopy,
 }: {
   formData: WizardFormData;
+  selectedService: PriceService;
   selectedOption: PriceOption;
   selectedDuration: CleaningDuration;
   selectedFrequency: FrequencyOption;
@@ -1762,18 +1768,19 @@ function calculatePrice({
   const bathroomCount = Math.max(toNumber(formData.bathrooms), 1);
   const squareMeters = toNumber(formData.squareMeters);
   const hasSquareMeterPricing = selectedOption.price.includes("/ m2");
+  const isAdditionalServicesRequest = selectedService.id === "ek-hizmetler";
   const isWaitingForSquareMeters = hasSquareMeterPricing && squareMeters === 0;
   const squareMeterBase =
     hasSquareMeterPricing && squareMeters > 0
       ? basePrice * squareMeters
       : basePrice;
-  const roomSurcharge = isWaitingForSquareMeters
+  const roomSurcharge = isWaitingForSquareMeters || isAdditionalServicesRequest
     ? 0
     : Math.max(roomCount - 1, 0) * 250;
-  const bathroomSurcharge = isWaitingForSquareMeters
+  const bathroomSurcharge = isWaitingForSquareMeters || isAdditionalServicesRequest
     ? 0
     : Math.max(bathroomCount - 1, 0) * 300;
-  const addOnsSurcharge = isWaitingForSquareMeters
+  const addOnsSurcharge = isWaitingForSquareMeters || isAdditionalServicesRequest
     ? 0
     : selectedAddOnsCount * 250;
   const baseSubtotal =

@@ -424,6 +424,34 @@ const priceData: Record<Locale, PriceData> = {
         includes: ["Boş alan temizliği", "Dolap içleri", "Kapı, duvar ve zemin detayları"],
       },
       {
+        id: "ek-hizmetler",
+        title: "Ek Hizmetler",
+        category: "Ek Hizmetler",
+        description:
+          "Sadece ek hizmetler için talep oluşturun ve ihtiyaç duyduğunuz seçenekleri işaretleyin.",
+        basePrice: "0 TL",
+        options: [
+          {
+            id: "ek-hizmetler",
+            label: "Ek hizmetler",
+            price: "0 TL",
+            detail: "İhtiyacınız olan ek hizmetleri seçin",
+          },
+        ],
+        includes: [
+          "Camları iki taraftan yıkama",
+          "Koltuk ve yatak yıkama",
+          "Kıyafet ütüleme",
+          "Balkon temizliği",
+          "Buzdolabı iç temizliği",
+          "Fırın iç temizliği",
+          "Evcil hayvan sonrası temizlik",
+          "Ozonlama",
+          "Yoğun kir giderme",
+          "Ofis ve ticari alan temizliği",
+        ],
+      },
+      {
         id: "koltuk-yikama",
         title: "Koltuk Yıkama",
         category: "Kumaş Bakımı",
@@ -598,6 +626,34 @@ const priceData: Record<Locale, PriceData> = {
         includes: ["Уборка пустого помещения", "Внутри шкафов", "Детали дверей, стен и пола"],
       },
       {
+        id: "ek-hizmetler",
+        title: "Дополнительные услуги",
+        category: "Дополнительные услуги",
+        description:
+          "Создайте отдельный запрос только на дополнительные услуги и отметьте нужные варианты.",
+        basePrice: "0 TL",
+        options: [
+          {
+            id: "ek-hizmetler",
+            label: "Дополнительные услуги",
+            price: "0 TL",
+            detail: "Выберите нужные дополнительные услуги",
+          },
+        ],
+        includes: [
+          "Мытье окон с двух сторон",
+          "Чистка дивана и матраса",
+          "Глажка одежды",
+          "Уборка балкона",
+          "Чистка холодильника внутри",
+          "Чистка духовки внутри",
+          "Уборка после домашних животных",
+          "Озонирование",
+          "Удаление сильных загрязнений",
+          "Уборка офиса и коммерческих помещений",
+        ],
+      },
+      {
         id: "koltuk-yikama",
         title: "Чистка диванов",
         category: "Уход за тканью",
@@ -767,6 +823,34 @@ const priceData: Record<Locale, PriceData> = {
           { id: "ozel", label: "Custom plan", price: "Get a quote", detail: "Based on space condition" },
         ],
         includes: ["Empty space cleaning", "Inside cabinets", "Door, wall, and floor details"],
+      },
+      {
+        id: "ek-hizmetler",
+        title: "Extra Services",
+        category: "Extra Services",
+        description:
+          "Create a separate request for extra services only and select the options you need.",
+        basePrice: "0 TL",
+        options: [
+          {
+            id: "ek-hizmetler",
+            label: "Extra services",
+            price: "0 TL",
+            detail: "Select the extra services you need",
+          },
+        ],
+        includes: [
+          "Wash windows on both sides",
+          "Sofa and mattress cleaning",
+          "Clothes ironing",
+          "Balcony cleaning",
+          "Inside refrigerator cleaning",
+          "Inside oven cleaning",
+          "After-pet cleaning",
+          "Ozone treatment",
+          "Heavy dirt removal",
+          "Office and commercial cleaning",
+        ],
       },
       {
         id: "koltuk-yikama",
