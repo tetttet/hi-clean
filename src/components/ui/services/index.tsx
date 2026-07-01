@@ -1774,9 +1774,6 @@ function calculatePrice({
     hasSquareMeterPricing && squareMeters > 0
       ? basePrice * squareMeters
       : basePrice;
-  const roomSurcharge = isWaitingForSquareMeters || isAdditionalServicesRequest
-    ? 0
-    : Math.max(roomCount - 1, 0) * 250;
   const bathroomSurcharge = isWaitingForSquareMeters || isAdditionalServicesRequest
     ? 0
     : Math.max(bathroomCount - 1, 0) * 300;
@@ -1784,7 +1781,7 @@ function calculatePrice({
     ? 0
     : selectedAddOnsCount * 250;
   const baseSubtotal =
-    squareMeterBase + roomSurcharge + bathroomSurcharge + addOnsSurcharge;
+    squareMeterBase + bathroomSurcharge + addOnsSurcharge;
   const speedSurcharge = isWaitingForSquareMeters
     ? Math.round(basePrice * (selectedDuration.multiplier - 1))
     : Math.round(baseSubtotal * (selectedDuration.multiplier - 1));
